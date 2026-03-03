@@ -36,6 +36,7 @@ idf_component_register(
         "hal/touch/hal_touch.c"
         "hal/battery/hal_battery.c"
         "hal/backlight/hal_backlight.c"
+        "hal/camera/sscma_client.c"
         "hal/camera/hal_camera.c"
         "hal/hal_init.c"
     INCLUDE_DIRS
