@@ -1,6 +1,6 @@
 #include "lvgl_port.h"
 #include "hal_display.h"
-#include "hal_touch.h"
+#include "../touch/hal_touch.h"
 #include "../hal_config.h"
 #include "esp_lvgl_port.h"
 #include "esp_log.h"
