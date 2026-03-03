@@ -7,8 +7,8 @@
 extern "C" {
 #endif
 
-esp_err_t lvgl_port_init(void);
-esp_err_t lvgl_port_deinit(void);
+esp_err_t hal_lvgl_init(void);
+esp_err_t hal_lvgl_deinit(void);
 
 #ifdef __cplusplus
 }
