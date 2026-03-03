@@ -20,10 +20,14 @@ idf_component_register(
         "tools/tool_get_time.c"
         "tools/tool_files.c"
         "skills/skill_loader.c"
+        "hal/led/hal_led.c"
+        "hal/audio/es8311.c"
+        "hal/audio/es7243e.c"
+        "hal/audio/hal_audio.c"
     INCLUDE_DIRS
         "."
     REQUIRES
         nvs_flash esp_wifi esp_netif esp_http_client esp_http_server
         esp_https_ota esp_event json spiffs console vfs app_update esp-tls
-        esp_timer
+        esp_timer driver
 )
