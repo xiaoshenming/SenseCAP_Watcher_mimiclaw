@@ -11,6 +11,7 @@
 #define GPIO_QSPI_PCLK          7
 #define GPIO_LCD_BACKLIGHT      8
 #define GPIO_QSPI_DATA0         9
+#define GPIO_QSPI_DATA1         1
 #define GPIO_I2S_MCLK           10
 #define GPIO_I2S_BCLK           11
 #define GPIO_I2S_WS             12

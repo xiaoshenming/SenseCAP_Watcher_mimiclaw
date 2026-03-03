@@ -113,7 +113,7 @@ esp_err_t spd2010_init(void)
     spi_bus_config_t bus_cfg = {
         .sclk_io_num = GPIO_QSPI_PCLK,
         .data0_io_num = GPIO_QSPI_DATA0,
-        .data1_io_num = -1,
+        .data1_io_num = GPIO_QSPI_DATA1,
         .data2_io_num = GPIO_QSPI_DATA2,
         .data3_io_num = GPIO_QSPI_DATA3,
         .max_transfer_sz = QSPI_MAX_TRANSFER_SZ,
