@@ -37,6 +37,9 @@
 #ifndef MIMI_SECRET_PROXY_TYPE
 #define MIMI_SECRET_PROXY_TYPE      ""
 #endif
+#ifndef MIMI_SECRET_LLM_USE_PROXY
+#define MIMI_SECRET_LLM_USE_PROXY   1
+#endif
 #ifndef MIMI_SECRET_SEARCH_KEY
 #define MIMI_SECRET_SEARCH_KEY      ""
 #endif
