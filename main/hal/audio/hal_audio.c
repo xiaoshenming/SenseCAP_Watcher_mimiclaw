@@ -109,7 +109,7 @@ esp_err_t hal_audio_init(const hal_audio_config_t *config)
     }
 
     /* 启用音频功放电源 */
-    ret = hal_io_exp_set_power(HAL_PWR_CODEC_PA, true);
+    ret = hal_io_exp_set_power(IO_EXP_PWR_CODEC_PA, true);
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Failed to enable audio power: %s", esp_err_to_name(ret));
         return ret;
@@ -225,7 +225,7 @@ err_channel:
     i2s_del_channel(s_audio.tx_chan);
     i2s_del_channel(s_audio.rx_chan);
 err_power:
-    hal_io_exp_set_power(HAL_PWR_CODEC_PA, false);
+    hal_io_exp_set_power(IO_EXP_PWR_CODEC_PA, false);
     return ret;
 }
 
@@ -251,7 +251,7 @@ esp_err_t hal_audio_deinit(void)
     i2s_del_channel(s_audio.rx_chan);
 
     /* 关闭音频功放电源 */
-    hal_io_exp_set_power(HAL_PWR_CODEC_PA, false);
+    hal_io_exp_set_power(IO_EXP_PWR_CODEC_PA, false);
 
     s_audio.initialized = false;
     ESP_LOGI(TAG, "Audio HAL deinitialized");

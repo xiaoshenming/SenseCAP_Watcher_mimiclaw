@@ -24,6 +24,7 @@
 #include "cron/cron_service.h"
 #include "heartbeat/heartbeat.h"
 #include "skills/skill_loader.h"
+#include "hal/hal_init.h"
 
 static const char *TAG = "mimi";
 
@@ -107,6 +108,13 @@ void app_main(void)
              (int)heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
     ESP_LOGI(TAG, "PSRAM free:    %d bytes",
              (int)heap_caps_get_free_size(MALLOC_CAP_SPIRAM));
+
+    /* Phase 0: Hardware initialization (SenseCAP Watcher) */
+    esp_err_t hal_err = hal_init();
+    if (hal_err != ESP_OK) {
+        ESP_LOGW(TAG, "HAL init incomplete: %s (software services will continue)",
+                 esp_err_to_name(hal_err));
+    }
 
     /* Phase 1: Core infrastructure */
     ESP_ERROR_CHECK(init_nvs());

@@ -105,7 +105,7 @@ esp_err_t hal_io_exp_init(void)
     return ESP_OK;
 }
 
-esp_err_t hal_io_exp_set_power(hal_power_pin_t pin, bool on)
+esp_err_t hal_io_exp_set_power(hal_io_exp_power_pin_t pin, bool on)
 {
     if (pin > 8) {
         return ESP_ERR_INVALID_ARG;

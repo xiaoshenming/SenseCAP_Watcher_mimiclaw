@@ -24,10 +24,20 @@ idf_component_register(
         "hal/audio/es8311.c"
         "hal/audio/es7243e.c"
         "hal/audio/hal_audio.c"
+        "hal/io_expander/tca9555.c"
+        "hal/io_expander/hal_io_exp.c"
+        "hal/power/hal_power.c"
+        "hal/display/spd2010.c"
+        "hal/display/hal_display.c"
+        "hal/sd_card/hal_sd.c"
+        "hal/input/hal_button.c"
+        "hal/input/hal_encoder.c"
+        "hal/touch/hal_touch.c"
+        "hal/hal_init.c"
     INCLUDE_DIRS
         "."
     REQUIRES
         nvs_flash esp_wifi esp_netif esp_http_client esp_http_server
         esp_https_ota esp_event json spiffs console vfs app_update esp-tls
-        esp_timer driver
+        esp_timer driver esp_adc
 )

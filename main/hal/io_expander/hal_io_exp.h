@@ -4,17 +4,17 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-/* Power control pins (Port 1 outputs) */
+/* Power control pins (Port 1 outputs) – raw TCA9555 pin numbers */
 typedef enum {
-    HAL_PWR_SDCARD = 0,
-    HAL_PWR_LCD = 1,
-    HAL_PWR_SYSTEM = 2,
-    HAL_PWR_AI_CHIP = 4,
-    HAL_PWR_CODEC_PA = 5,
-    HAL_PWR_BAT_DET = 6,
-    HAL_PWR_GROVE = 7,
-    HAL_PWR_BAT_ADC = 8,
-} hal_power_pin_t;
+    IO_EXP_PWR_SDCARD   = 0,
+    IO_EXP_PWR_LCD      = 1,
+    IO_EXP_PWR_SYSTEM   = 2,
+    IO_EXP_PWR_AI_CHIP  = 4,
+    IO_EXP_PWR_CODEC_PA = 5,
+    IO_EXP_PWR_BAT_DET  = 6,
+    IO_EXP_PWR_GROVE    = 7,
+    IO_EXP_PWR_BAT_ADC  = 8,
+} hal_io_exp_power_pin_t;
 
 /* Input detection pins (Port 0 inputs) */
 typedef enum {
@@ -48,7 +48,7 @@ esp_err_t hal_io_exp_init(void);
  * @param pin  Power control pin (HAL_PWR_*).
  * @param on   true = power on, false = power off.
  */
-esp_err_t hal_io_exp_set_power(hal_power_pin_t pin, bool on);
+esp_err_t hal_io_exp_set_power(hal_io_exp_power_pin_t pin, bool on);
 
 /**
  * Read an input pin state.
