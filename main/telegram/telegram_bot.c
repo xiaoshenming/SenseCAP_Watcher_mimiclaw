@@ -561,3 +561,109 @@ esp_err_t telegram_set_token(const char *token)
     ESP_LOGI(TAG, "Telegram bot token saved");
     return ESP_OK;
 }
+
+/* Build multipart/form-data for photo upload */
+static char *build_multipart_photo(const char *chat_id, const uint8_t *photo_buf,
+                                   size_t photo_len, const char *caption,
+                                   const char *boundary, size_t *out_len)
+{
+    /* Calculate total size */
+    size_t size = 0;
+    size += strlen("--") + strlen(boundary) + strlen("\r\n");
+    size += strlen("Content-Disposition: form-data; name=\"chat_id\"\r\n\r\n");
+    size += strlen(chat_id) + strlen("\r\n");
+
+    if (caption && caption[0]) {
+        size += strlen("--") + strlen(boundary) + strlen("\r\n");
+        size += strlen("Content-Disposition: form-data; name=\"caption\"\r\n\r\n");
+        size += strlen(caption) + strlen("\r\n");
+    }
+
+    size += strlen("--") + strlen(boundary) + strlen("\r\n");
+    size += strlen("Content-Disposition: form-data; name=\"photo\"; filename=\"photo.jpg\"\r\n");
+    size += strlen("Content-Type: image/jpeg\r\n\r\n");
+    size += photo_len;
+    size += strlen("\r\n--") + strlen(boundary) + strlen("--\r\n");
+
+    char *data = malloc(size);
+    if (!data) return NULL;
+
+    size_t off = 0;
+    off += sprintf(data + off, "--%s\r\n", boundary);
+    off += sprintf(data + off, "Content-Disposition: form-data; name=\"chat_id\"\r\n\r\n%s\r\n", chat_id);
+
+    if (caption && caption[0]) {
+        off += sprintf(data + off, "--%s\r\n", boundary);
+        off += sprintf(data + off, "Content-Disposition: form-data; name=\"caption\"\r\n\r\n%s\r\n", caption);
+    }
+
+    off += sprintf(data + off, "--%s\r\n", boundary);
+    off += sprintf(data + off, "Content-Disposition: form-data; name=\"photo\"; filename=\"photo.jpg\"\r\n");
+    off += sprintf(data + off, "Content-Type: image/jpeg\r\n\r\n");
+    memcpy(data + off, photo_buf, photo_len);
+    off += photo_len;
+    off += sprintf(data + off, "\r\n--%s--\r\n", boundary);
+
+    *out_len = off;
+    return data;
+}
+
+esp_err_t telegram_send_photo(const char *chat_id, const uint8_t *photo_buf,
+                              size_t photo_len, const char *caption)
+{
+    if (s_bot_token[0] == '\0') {
+        ESP_LOGW(TAG, "Cannot send photo: no bot token");
+        return ESP_ERR_INVALID_STATE;
+    }
+
+    const char *boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW";
+    size_t multipart_len = 0;
+    char *multipart_data = build_multipart_photo(chat_id, photo_buf, photo_len,
+                                                 caption, boundary, &multipart_len);
+    if (!multipart_data) {
+        ESP_LOGE(TAG, "Failed to build multipart data");
+        return ESP_ERR_NO_MEM;
+    }
+
+    char url[256];
+    snprintf(url, sizeof(url), "https://api.telegram.org/bot%s/sendPhoto", s_bot_token);
+
+    char content_type[128];
+    snprintf(content_type, sizeof(content_type), "multipart/form-data; boundary=%s", boundary);
+
+    esp_http_client_config_t config = {
+        .url = url,
+        .method = HTTP_METHOD_POST,
+        .timeout_ms = 30000,
+        .crt_bundle_attach = esp_crt_bundle_attach,
+    };
+
+    esp_http_client_handle_t client = esp_http_client_init(&config);
+    if (!client) {
+        free(multipart_data);
+        return ESP_FAIL;
+    }
+
+    esp_http_client_set_header(client, "Content-Type", content_type);
+    esp_http_client_set_post_field(client, multipart_data, multipart_len);
+
+    ESP_LOGI(TAG, "Sending photo to chat %s (%u bytes)", chat_id, (unsigned)photo_len);
+    esp_err_t err = esp_http_client_perform(client);
+    int status = esp_http_client_get_status_code(client);
+
+    esp_http_client_cleanup(client);
+    free(multipart_data);
+
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "HTTP request failed: %s", esp_err_to_name(err));
+        return err;
+    }
+
+    if (status != 200) {
+        ESP_LOGE(TAG, "Telegram API error: HTTP %d", status);
+        return ESP_FAIL;
+    }
+
+    ESP_LOGI(TAG, "Photo sent successfully to chat %s", chat_id);
+    return ESP_OK;
+}

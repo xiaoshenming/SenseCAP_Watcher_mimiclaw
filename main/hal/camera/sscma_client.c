@@ -1,126 +1,130 @@
 #include "sscma_client.h"
 #include "../hal_config.h"
 #include "../io_expander/hal_io_exp.h"
-#include "driver/spi_master.h"
+#include "sscma_client_io.h"
+#include "sscma_client_ops.h"
+#include "driver/spi_common.h"
 #include "driver/gpio.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "freertos/queue.h"
 #include <string.h>
 #include <stdlib.h>
 
 static const char *TAG = "sscma";
 
-#define SSCMA_CMD_INVOKE    0x01
-#define SSCMA_CMD_SAMPLE    0x02
-#define SSCMA_RESP_OK       0x00
-
-static spi_device_handle_t s_spi = NULL;
+static sscma_client_handle_t s_client = NULL;
+static QueueHandle_t s_image_queue = NULL;
 static uint8_t *s_img_buf = NULL;
 static size_t s_img_len = 0;
 
-static esp_err_t sscma_spi_write(const uint8_t *data, size_t len)
-{
-    spi_transaction_t t = {
-        .length = len * 8,
-        .tx_buffer = data,
-    };
-    return spi_device_polling_transmit(s_spi, &t);
-}
+typedef struct {
+    uint8_t *data;
+    size_t len;
+} image_data_t;
 
-static esp_err_t sscma_spi_read(uint8_t *data, size_t len)
+static void on_event_cb(sscma_client_handle_t client, const sscma_client_reply_t *reply, void *user_ctx)
 {
-    spi_transaction_t t = {
-        .length = len * 8,
-        .rx_buffer = data,
-        .flags = SPI_TRANS_USE_RXDATA,
+    if (!reply || !reply->data || reply->len == 0) return;
+
+    image_data_t img = {
+        .data = (uint8_t*)malloc(reply->len),
+        .len = reply->len
     };
-    if (len > 4) {
-        t.flags = 0;
+
+    if (img.data) {
+        memcpy(img.data, reply->data, reply->len);
+        xQueueSend(s_image_queue, &img, 0);
     }
-    return spi_device_polling_transmit(s_spi, &t);
 }
 
-esp_err_t sscma_client_init(void)
+esp_err_t sscma_hal_init(void)
 {
-    if (s_spi) return ESP_OK;
+    if (s_client) return ESP_OK;
 
     hal_io_exp_set_power(IO_EXP_PWR_AI_CHIP, true);
     vTaskDelay(pdMS_TO_TICKS(100));
 
-    spi_bus_config_t bus_cfg = {
-        .mosi_io_num = GPIO_SPI2_MOSI,
-        .miso_io_num = GPIO_SPI2_MISO,
-        .sclk_io_num = GPIO_SPI2_SCLK,
-        .quadwp_io_num = -1,
-        .quadhd_io_num = -1,
-        .max_transfer_sz = 65536,
+    sscma_client_io_spi_config_t io_cfg = {
+        .cs_gpio_num = GPIO_SSCMA_CS,
+        .sync_gpio_num = 6,
+        .spi_mode = 0,
+        .wait_delay = 10,
+        .pclk_hz = 12 * 1000 * 1000,
+        .trans_queue_depth = 1,
+        .io_expander = NULL,
+        .flags = {
+            .sync_use_expander = 1,
+        }
     };
-    ESP_ERROR_CHECK(spi_bus_initialize(SPI2_HOST, &bus_cfg, SPI_DMA_CH_AUTO));
 
-    spi_device_interface_config_t dev_cfg = {
-        .clock_speed_hz = 10 * 1000 * 1000,
-        .mode = 0,
-        .spics_io_num = GPIO_SSCMA_CS,
-        .queue_size = 1,
+    sscma_client_io_handle_t io_handle;
+    ESP_ERROR_CHECK(sscma_client_new_io_spi_bus((sscma_client_spi_bus_handle_t)SPI2_HOST, &io_cfg, &io_handle));
+
+    sscma_client_config_t client_cfg = SSCMA_CLIENT_CONFIG_DEFAULT();
+    client_cfg.reset_gpio_num = 7;
+    client_cfg.rx_buffer_size = 98304;
+    client_cfg.io_expander = NULL;
+    client_cfg.flags.reset_use_expander = 1;
+
+    ESP_ERROR_CHECK(sscma_client_new(io_handle, &client_cfg, &s_client));
+
+    sscma_client_callback_t cb = {
+        .on_event = on_event_cb,
     };
-    ESP_ERROR_CHECK(spi_bus_add_device(SPI2_HOST, &dev_cfg, &s_spi));
+    sscma_client_register_callback(s_client, &cb, NULL);
 
-    vTaskDelay(pdMS_TO_TICKS(3000));
+    s_image_queue = xQueueCreate(1, sizeof(image_data_t));
+
+    ESP_ERROR_CHECK(sscma_client_init(s_client));
+    vTaskDelay(pdMS_TO_TICKS(2000));
+
     ESP_LOGI(TAG, "SSCMA client initialized");
     return ESP_OK;
 }
 
-esp_err_t sscma_client_capture(sscma_image_t *image)
+esp_err_t sscma_hal_capture(sscma_image_t *image)
 {
-    if (!s_spi || !image) return ESP_ERR_INVALID_ARG;
+    if (!s_client || !image) return ESP_ERR_INVALID_ARG;
 
-    uint8_t cmd[] = {SSCMA_CMD_SAMPLE, 0x02};
-    ESP_ERROR_CHECK(sscma_spi_write(cmd, sizeof(cmd)));
-    vTaskDelay(pdMS_TO_TICKS(500));
-
-    uint8_t resp[8];
-    ESP_ERROR_CHECK(sscma_spi_read(resp, sizeof(resp)));
-    
-    if (resp[0] != SSCMA_RESP_OK) {
-        ESP_LOGW(TAG, "Capture failed: 0x%02x", resp[0]);
-        return ESP_FAIL;
+    image_data_t dummy;
+    while (xQueueReceive(s_image_queue, &dummy, 0) == pdPASS) {
+        if (dummy.data) free(dummy.data);
     }
 
-    uint32_t img_size = (resp[4] << 24) | (resp[5] << 16) | (resp[6] << 8) | resp[7];
-    if (img_size == 0 || img_size > 100000) {
-        ESP_LOGW(TAG, "Invalid image size: %lu", img_size);
-        return ESP_FAIL;
+    ESP_ERROR_CHECK(sscma_client_sample(s_client, 1));
+
+    image_data_t img;
+    if (xQueueReceive(s_image_queue, &img, pdMS_TO_TICKS(3000)) != pdPASS) {
+        ESP_LOGW(TAG, "Timeout waiting for image");
+        return ESP_ERR_TIMEOUT;
     }
 
     if (s_img_buf) free(s_img_buf);
-    s_img_buf = malloc(img_size);
-    if (!s_img_buf) return ESP_ERR_NO_MEM;
-
-    spi_transaction_t t = {
-        .length = img_size * 8,
-        .rx_buffer = s_img_buf,
-    };
-    ESP_ERROR_CHECK(spi_device_polling_transmit(s_spi, &t));
+    s_img_buf = img.data;
+    s_img_len = img.len;
 
     image->data = s_img_buf;
-    image->len = img_size;
-    s_img_len = img_size;
+    image->len = s_img_len;
 
-    ESP_LOGI(TAG, "Captured %zu bytes", img_size);
+    ESP_LOGI(TAG, "Captured %zu bytes", s_img_len);
     return ESP_OK;
 }
 
-esp_err_t sscma_client_deinit(void)
+esp_err_t sscma_hal_deinit(void)
 {
     if (s_img_buf) {
         free(s_img_buf);
         s_img_buf = NULL;
     }
-    if (s_spi) {
-        spi_bus_remove_device(s_spi);
-        spi_bus_free(SPI2_HOST);
-        s_spi = NULL;
+    if (s_client) {
+        sscma_client_del(s_client);
+        s_client = NULL;
+    }
+    if (s_image_queue) {
+        vQueueDelete(s_image_queue);
+        s_image_queue = NULL;
     }
     hal_io_exp_set_power(IO_EXP_PWR_AI_CHIP, false);
     return ESP_OK;

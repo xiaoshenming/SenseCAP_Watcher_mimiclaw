@@ -65,11 +65,11 @@
 #define IO_EXP_P1_PWR_SDCARD        0
 #define IO_EXP_P1_PWR_LCD           1
 #define IO_EXP_P1_PWR_SYSTEM        2
-#define IO_EXP_P1_PWR_AI_CHIP       4
-#define IO_EXP_P1_PWR_CODEC_PA      5
-#define IO_EXP_P1_PWR_BAT_DET       6
-#define IO_EXP_P1_PWR_GROVE         7
-#define IO_EXP_P1_PWR_BAT_ADC       8
+#define IO_EXP_P1_PWR_AI_CHIP       3
+#define IO_EXP_P1_PWR_CODEC_PA      4
+#define IO_EXP_P1_PWR_BAT_DET       5
+#define IO_EXP_P1_PWR_GROVE         6
+#define IO_EXP_P1_PWR_BAT_ADC       7
 
 // 电池 ADC 配置
 #define BAT_ADC_CHANNEL         ADC_CHANNEL_2

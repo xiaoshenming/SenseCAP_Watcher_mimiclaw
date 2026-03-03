@@ -195,6 +195,7 @@ static const char *llm_api_url(void)
     if (s_base_url[0] != '\0') {
         const char *endpoint = provider_is_openai() ? "/chat/completions" : "/messages";
         snprintf(custom_url, sizeof(custom_url), "%s%s", s_base_url, endpoint);
+        ESP_LOGI(TAG, "Custom URL: base='%s' + endpoint='%s' = '%s'", s_base_url, endpoint, custom_url);
         return custom_url;
     }
     return provider_is_openai() ? MIMI_OPENAI_API_URL : MIMI_LLM_API_URL;
@@ -218,6 +219,18 @@ static const char *llm_api_host(void)
 
 static const char *llm_api_path(void)
 {
+    static char custom_path[128];
+    if (s_base_url[0] != '\0') {
+        const char *url = llm_api_url();
+        const char *start = strstr(url, "://");
+        if (start) {
+            start = strchr(start + 3, '/');
+            if (start) {
+                snprintf(custom_path, sizeof(custom_path), "%s", start);
+                return custom_path;
+            }
+        }
+    }
     return provider_is_openai() ? "/v1/chat/completions" : "/v1/messages";
 }
 
@@ -269,8 +282,11 @@ esp_err_t llm_proxy_init(void)
 
 static esp_err_t llm_http_direct(const char *post_data, resp_buf_t *rb, int *out_status)
 {
+    const char *url = llm_api_url();
+    ESP_LOGI(TAG, "API URL: %s", url);
+
     esp_http_client_config_t config = {
-        .url = llm_api_url(),
+        .url = url,
         .event_handler = http_event_handler,
         .user_data = rb,
         .timeout_ms = 120 * 1000,

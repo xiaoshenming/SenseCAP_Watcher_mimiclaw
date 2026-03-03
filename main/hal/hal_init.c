@@ -42,6 +42,7 @@ esp_err_t watcher_hal_init(void)
     hal_power_enable(HAL_PWR_SYSTEM, true);
     hal_power_enable(HAL_PWR_LCD, true);
     hal_power_enable(HAL_PWR_CODEC_PA, true);
+    hal_power_enable(HAL_PWR_BAT_ADC, true);
     vTaskDelay(pdMS_TO_TICKS(50));  /* Let power stabilize */
     ESP_LOGI(TAG, "[2/8] Power OK");
 

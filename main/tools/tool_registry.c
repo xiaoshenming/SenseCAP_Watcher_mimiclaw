@@ -4,6 +4,9 @@
 #include "tools/tool_get_time.h"
 #include "tools/tool_files.h"
 #include "tools/tool_cron.h"
+#include "tools/tool_camera.h"
+#include "tools/tool_display.h"
+#include "tools/tool_sysinfo.h"
 
 #include <string.h>
 #include "esp_log.h"
@@ -175,6 +178,46 @@ esp_err_t tool_registry_init(void)
         .execute = tool_cron_remove_execute,
     };
     register_tool(&cr);
+
+    /* Register camera_capture */
+    mimi_tool_t cam = {
+        .name = "camera_capture",
+        .description = "Capture a photo using the device camera. Can optionally send the photo via Telegram.",
+        .input_schema_json =
+            "{\"type\":\"object\","
+            "\"properties\":{"
+            "\"action\":{\"type\":\"string\",\"description\":\"Action to perform, must be 'capture'\"},"
+            "\"send_telegram\":{\"type\":\"boolean\",\"description\":\"Whether to send the photo via Telegram\"},"
+            "\"chat_id\":{\"type\":\"string\",\"description\":\"Telegram chat ID (required if send_telegram=true)\"}"
+            "},"
+            "\"required\":[\"action\"]}",
+        .execute = tool_camera_execute,
+    };
+    register_tool(&cam);
+
+    /* Register display_text */
+    mimi_tool_t disp = {
+        .name = "display_text",
+        .description = "Display text on the device screen.",
+        .input_schema_json =
+            "{\"type\":\"object\","
+            "\"properties\":{\"text\":{\"type\":\"string\",\"description\":\"Text to display\"}},"
+            "\"required\":[\"text\"]}",
+        .execute = tool_display_execute,
+    };
+    register_tool(&disp);
+
+    /* Register get_system_info */
+    mimi_tool_t sysinfo = {
+        .name = "get_system_info",
+        .description = "Get device system information like battery level, WiFi status, etc.",
+        .input_schema_json =
+            "{\"type\":\"object\","
+            "\"properties\":{\"info_type\":{\"type\":\"string\",\"description\":\"Type of info: 'battery', 'wifi', or 'all'\"}},"
+            "\"required\":[]}",
+        .execute = tool_sysinfo_execute,
+    };
+    register_tool(&sysinfo);
 
     build_tools_json();
 

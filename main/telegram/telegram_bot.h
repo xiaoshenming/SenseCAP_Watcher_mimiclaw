@@ -25,3 +25,13 @@ esp_err_t telegram_send_message(const char *chat_id, const char *text);
  */
 esp_err_t telegram_set_token(const char *token);
 
+/**
+ * Send a photo to a Telegram chat.
+ * @param chat_id   Telegram chat ID (numeric string)
+ * @param photo_buf JPEG image buffer
+ * @param photo_len Image buffer length
+ * @param caption   Optional caption text
+ */
+esp_err_t telegram_send_photo(const char *chat_id, const uint8_t *photo_buf,
+                              size_t photo_len, const char *caption);
+

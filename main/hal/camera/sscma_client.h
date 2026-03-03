@@ -14,9 +14,9 @@ typedef struct {
     size_t len;
 } sscma_image_t;
 
-esp_err_t sscma_client_init(void);
-esp_err_t sscma_client_capture(sscma_image_t *image);
-esp_err_t sscma_client_deinit(void);
+esp_err_t sscma_hal_init(void);
+esp_err_t sscma_hal_capture(sscma_image_t *image);
+esp_err_t sscma_hal_deinit(void);
 
 #ifdef __cplusplus
 }
