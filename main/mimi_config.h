@@ -25,6 +25,9 @@
 #ifndef MIMI_SECRET_MODEL_PROVIDER
 #define MIMI_SECRET_MODEL_PROVIDER  "anthropic"
 #endif
+#ifndef MIMI_SECRET_API_BASE_URL
+#define MIMI_SECRET_API_BASE_URL    ""
+#endif
 #ifndef MIMI_SECRET_PROXY_HOST
 #define MIMI_SECRET_PROXY_HOST      ""
 #endif

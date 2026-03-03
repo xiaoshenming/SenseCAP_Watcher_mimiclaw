@@ -44,7 +44,7 @@ static esp_err_t cst816s_read_regs(uint8_t reg, uint8_t *buf, size_t len)
 }
 
 /* IO expander interrupt callback - reads touch and fires user callback */
-static void touch_isr_handler(void *arg)
+static void touch_isr_handler(uint8_t port0_state, void *arg)
 {
     if (!s_touch.cb) return;
 

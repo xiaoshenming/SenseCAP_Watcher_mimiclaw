@@ -110,7 +110,7 @@ void app_main(void)
              (int)heap_caps_get_free_size(MALLOC_CAP_SPIRAM));
 
     /* Phase 0: Hardware initialization (SenseCAP Watcher) */
-    esp_err_t hal_err = hal_init();
+    esp_err_t hal_err = watcher_hal_init();
     if (hal_err != ESP_OK) {
         ESP_LOGW(TAG, "HAL init incomplete: %s (software services will continue)",
                  esp_err_to_name(hal_err));

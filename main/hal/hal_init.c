@@ -16,7 +16,7 @@
 
 static const char *TAG = "hal_init";
 
-esp_err_t hal_init(void)
+esp_err_t watcher_hal_init(void)
 {
     esp_err_t ret;
 
@@ -119,7 +119,7 @@ esp_err_t hal_init(void)
     return ESP_OK;
 }
 
-esp_err_t hal_deinit(void)
+esp_err_t watcher_hal_deinit(void)
 {
     ESP_LOGI(TAG, "HAL deinit...");
 

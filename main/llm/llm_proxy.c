@@ -15,12 +15,14 @@ static const char *TAG = "llm";
 
 #define LLM_API_KEY_MAX_LEN 320
 #define LLM_MODEL_MAX_LEN   64
+#define LLM_BASE_URL_MAX_LEN 128
 #define LLM_DUMP_MAX_BYTES   (16 * 1024)
 #define LLM_DUMP_CHUNK_BYTES 320
 
 static char s_api_key[LLM_API_KEY_MAX_LEN] = {0};
 static char s_model[LLM_MODEL_MAX_LEN] = MIMI_LLM_DEFAULT_MODEL;
 static char s_provider[16] = MIMI_LLM_PROVIDER_DEFAULT;
+static char s_base_url[LLM_BASE_URL_MAX_LEN] = MIMI_SECRET_API_BASE_URL;
 
 static void llm_log_payload(const char *label, const char *payload)
 {
@@ -189,11 +191,28 @@ static bool provider_is_openai(void)
 
 static const char *llm_api_url(void)
 {
+    static char custom_url[256];
+    if (s_base_url[0] != '\0') {
+        const char *endpoint = provider_is_openai() ? "/chat/completions" : "/messages";
+        snprintf(custom_url, sizeof(custom_url), "%s%s", s_base_url, endpoint);
+        return custom_url;
+    }
     return provider_is_openai() ? MIMI_OPENAI_API_URL : MIMI_LLM_API_URL;
 }
 
 static const char *llm_api_host(void)
 {
+    static char custom_host[128];
+    if (s_base_url[0] != '\0') {
+        const char *start = strstr(s_base_url, "://");
+        start = start ? start + 3 : s_base_url;
+        const char *end = strchr(start, '/');
+        size_t len = end ? (size_t)(end - start) : strlen(start);
+        if (len >= sizeof(custom_host)) len = sizeof(custom_host) - 1;
+        memcpy(custom_host, start, len);
+        custom_host[len] = '\0';
+        return custom_host;
+    }
     return provider_is_openai() ? "api.openai.com" : "api.anthropic.com";
 }
 

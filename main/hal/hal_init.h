@@ -23,12 +23,12 @@ extern "C" {
  *         Non-critical failures (LED, SD) are logged but do not
  *         prevent the remaining modules from initializing.
  */
-esp_err_t hal_init(void);
+esp_err_t watcher_hal_init(void);
 
 /**
  * Deinitialize all hardware modules (reverse order).
  */
-esp_err_t hal_deinit(void);
+esp_err_t watcher_hal_deinit(void);
 
 #ifdef __cplusplus
 }

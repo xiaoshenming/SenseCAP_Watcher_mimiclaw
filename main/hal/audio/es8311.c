@@ -1,5 +1,7 @@
 #include "es8311.h"
 #include "esp_log.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 #include <string.h>
 
 static const char *TAG = "ES8311";
