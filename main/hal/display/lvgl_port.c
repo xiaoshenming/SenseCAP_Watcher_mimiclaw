@@ -27,8 +27,8 @@ esp_err_t hal_lvgl_init(void)
     lv_display_t *disp = lv_display_create(LCD_WIDTH, LCD_HEIGHT);
     lv_display_set_flush_cb(disp, lvgl_flush_cb);
 
-    /* Allocate draw buffers */
-    size_t buf_size = LCD_WIDTH * 40;
+    /* Allocate draw buffers - use smaller buffer to avoid SPI transfer size limit */
+    size_t buf_size = LCD_WIDTH * 10;  /* 10 lines instead of 40 */
     size_t buf_bytes = buf_size * sizeof(lv_color_t);
     void *buf1 = heap_caps_malloc(buf_bytes, MALLOC_CAP_SPIRAM);
     void *buf2 = heap_caps_malloc(buf_bytes, MALLOC_CAP_SPIRAM);

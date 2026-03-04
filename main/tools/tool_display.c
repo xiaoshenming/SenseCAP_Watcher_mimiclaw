@@ -54,7 +54,10 @@ esp_err_t tool_display_execute(const char *input_json, char *output, size_t outp
     }
 
     lv_label_set_text(s_label, text_copy);
-    lv_refr_now(NULL);
+
+    /* Force immediate refresh with the default display */
+    lv_obj_invalidate(s_label);
+    lv_refr_now(lv_display_get_default());
 
     lvgl_port_unlock();
 

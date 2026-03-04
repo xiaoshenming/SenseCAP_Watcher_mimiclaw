@@ -110,7 +110,11 @@ esp_err_t sscma_hal_capture(sscma_image_t *image)
         if (dummy.data) free(dummy.data);
     }
 
-    ESP_ERROR_CHECK(sscma_client_sample(s_client, 1));
+    esp_err_t sample_ret = sscma_client_sample(s_client, 1);
+    if (sample_ret != ESP_OK) {
+        ESP_LOGE(TAG, "sscma_client_sample failed: %s", esp_err_to_name(sample_ret));
+        return sample_ret;
+    }
 
     image_data_t img;
     if (xQueueReceive(s_image_queue, &img, pdMS_TO_TICKS(3000)) != pdPASS) {
