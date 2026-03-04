@@ -1,105 +1,183 @@
-idf.py build &&  idf.py flash monitor
-Executing action: all (aliases: build)
-Running ninja in directory /home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/build
-Executing "ninja all"...
-[0/1] Re-running CMake...
--- Minimal build - OFF
--- Building ESP-IDF components for target esp32s3
-NOTICE: Manifest files have changed, solving dependencies.
-........NOTICE: Updating lock file at /home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/dependencies.lock
-NOTICE: Processing 5 dependencies:
-NOTICE: [1/5] espressif/esp_io_expander (1.2.0)
-NOTICE: [2/5] espressif/esp_lvgl_port (2.7.2)
-NOTICE: [3/5] lvgl/lvgl (9.5.0)
-NOTICE: [4/5] wvirgil123/sscma_client (1.0.2)
-NOTICE: [5/5] idf (5.5.2)
--- ESP-TEE is currently supported only on the esp32c6;esp32h2;esp32c5 SoCs
--- Project sdkconfig file /home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/sdkconfig
-Loading defaults file /home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/sdkconfig.defaults...
-Loading defaults file /home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/sdkconfig.defaults.esp32s3...
--- Compiler supported targets: xtensa-esp-elf
--- USING O3
--- App "mimiclaw" version: be15077-dirty
--- Adding linker script /home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/build/esp-idf/esp_system/ld/memory.ld
--- Adding linker script /home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/build/esp-idf/esp_system/ld/sections.ld.in
--- Adding linker script /opt/esp-idf/components/esp_rom/esp32s3/ld/esp32s3.rom.ld
--- Adding linker script /opt/esp-idf/components/esp_rom/esp32s3/ld/esp32s3.rom.api.ld
--- Adding linker script /opt/esp-idf/components/esp_rom/esp32s3/ld/esp32s3.rom.bt_funcs.ld
--- Adding linker script /opt/esp-idf/components/esp_rom/esp32s3/ld/esp32s3.rom.libgcc.ld
--- Adding linker script /opt/esp-idf/components/esp_rom/esp32s3/ld/esp32s3.rom.wdt.ld
--- Adding linker script /opt/esp-idf/components/esp_rom/esp32s3/ld/esp32s3.rom.version.ld
--- Adding linker script /opt/esp-idf/components/esp_rom/esp32s3/ld/esp32s3.rom.ble_master.ld
--- Adding linker script /opt/esp-idf/components/esp_rom/esp32s3/ld/esp32s3.rom.ble_50.ld
--- Adding linker script /opt/esp-idf/components/esp_rom/esp32s3/ld/esp32s3.rom.ble_smp.ld
--- Adding linker script /opt/esp-idf/components/esp_rom/esp32s3/ld/esp32s3.rom.ble_dtm.ld
--- Adding linker script /opt/esp-idf/components/esp_rom/esp32s3/ld/esp32s3.rom.ble_test.ld
--- Adding linker script /opt/esp-idf/components/esp_rom/esp32s3/ld/esp32s3.rom.ble_scan.ld
--- Adding linker script /opt/esp-idf/components/esp_rom/esp32s3/ld/esp32s3.rom.libc.ld
--- Adding linker script /opt/esp-idf/components/esp_rom/esp32s3/ld/esp32s3.rom.newlib.ld
--- Adding linker script /opt/esp-idf/components/soc/esp32s3/ld/esp32s3.peripherals.ld
--- LVGL version: 9.5.0
--- Components: app_trace app_update bootloader bootloader_support bt cmock console cxx driver efuse esp-tls esp_adc esp_app_format esp_bootloader_format esp_coex esp_common esp_driver_ana_cmpr esp_driver_bitscrambler esp_driver_cam esp_driver_dac esp_driver_gpio esp_driver_gptimer esp_driver_i2c esp_driver_i2s esp_driver_isp esp_driver_jpeg esp_driver_ledc esp_driver_mcpwm esp_driver_parlio esp_driver_pcnt esp_driver_ppa esp_driver_rmt esp_driver_sdio esp_driver_sdm esp_driver_sdmmc esp_driver_sdspi esp_driver_spi esp_driver_touch_sens esp_driver_tsens esp_driver_twai esp_driver_uart esp_driver_usb_serial_jtag esp_eth esp_event esp_gdbstub esp_hid esp_http_client esp_http_server esp_https_ota esp_https_server esp_hw_support esp_lcd esp_local_ctrl esp_mm esp_netif esp_netif_stack esp_partition esp_phy esp_pm esp_psram esp_ringbuf esp_rom esp_security esp_system esp_timer esp_vfs_console esp_wifi espcoredump espressif__esp_io_expander espressif__esp_lvgl_port esptool_py fatfs freertos hal heap http_parser idf_test ieee802154 json log lvgl__lvgl lwip main mbedtls mqtt newlib nvs_flash nvs_sec_provider openthread partition_table perfmon protobuf-c protocomm pthread rt sdmmc soc spi_flash spiffs tcp_transport touch_element ulp unity usb vfs wear_levelling wifi_provisioning wpa_supplicant wvirgil123__sscma_client xtensa
--- Component paths: /opt/esp-idf/components/app_trace /opt/esp-idf/components/app_update /opt/esp-idf/components/bootloader /opt/esp-idf/components/bootloader_support /opt/esp-idf/components/bt /opt/esp-idf/components/cmock /opt/esp-idf/components/console /opt/esp-idf/components/cxx /opt/esp-idf/components/driver /opt/esp-idf/components/efuse /opt/esp-idf/components/esp-tls /opt/esp-idf/components/esp_adc /opt/esp-idf/components/esp_app_format /opt/esp-idf/components/esp_bootloader_format /opt/esp-idf/components/esp_coex /opt/esp-idf/components/esp_common /opt/esp-idf/components/esp_driver_ana_cmpr /opt/esp-idf/components/esp_driver_bitscrambler /opt/esp-idf/components/esp_driver_cam /opt/esp-idf/components/esp_driver_dac /opt/esp-idf/components/esp_driver_gpio /opt/esp-idf/components/esp_driver_gptimer /opt/esp-idf/components/esp_driver_i2c /opt/esp-idf/components/esp_driver_i2s /opt/esp-idf/components/esp_driver_isp /opt/esp-idf/components/esp_driver_jpeg /opt/esp-idf/components/esp_driver_ledc /opt/esp-idf/components/esp_driver_mcpwm /opt/esp-idf/components/esp_driver_parlio /opt/esp-idf/components/esp_driver_pcnt /opt/esp-idf/components/esp_driver_ppa /opt/esp-idf/components/esp_driver_rmt /opt/esp-idf/components/esp_driver_sdio /opt/esp-idf/components/esp_driver_sdm /opt/esp-idf/components/esp_driver_sdmmc /opt/esp-idf/components/esp_driver_sdspi /opt/esp-idf/components/esp_driver_spi /opt/esp-idf/components/esp_driver_touch_sens /opt/esp-idf/components/esp_driver_tsens /opt/esp-idf/components/esp_driver_twai /opt/esp-idf/components/esp_driver_uart /opt/esp-idf/components/esp_driver_usb_serial_jtag /opt/esp-idf/components/esp_eth /opt/esp-idf/components/esp_event /opt/esp-idf/components/esp_gdbstub /opt/esp-idf/components/esp_hid /opt/esp-idf/components/esp_http_client /opt/esp-idf/components/esp_http_server /opt/esp-idf/components/esp_https_ota /opt/esp-idf/components/esp_https_server /opt/esp-idf/components/esp_hw_support /opt/esp-idf/components/esp_lcd /opt/esp-idf/components/esp_local_ctrl /opt/esp-idf/components/esp_mm /opt/esp-idf/components/esp_netif /opt/esp-idf/components/esp_netif_stack /opt/esp-idf/components/esp_partition /opt/esp-idf/components/esp_phy /opt/esp-idf/components/esp_pm /opt/esp-idf/components/esp_psram /opt/esp-idf/components/esp_ringbuf /opt/esp-idf/components/esp_rom /opt/esp-idf/components/esp_security /opt/esp-idf/components/esp_system /opt/esp-idf/components/esp_timer /opt/esp-idf/components/esp_vfs_console /opt/esp-idf/components/esp_wifi /opt/esp-idf/components/espcoredump /home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/managed_components/espressif__esp_io_expander /home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/managed_components/espressif__esp_lvgl_port /opt/esp-idf/components/esptool_py /opt/esp-idf/components/fatfs /opt/esp-idf/components/freertos /opt/esp-idf/components/hal /opt/esp-idf/components/heap /opt/esp-idf/components/http_parser /opt/esp-idf/components/idf_test /opt/esp-idf/components/ieee802154 /opt/esp-idf/components/json /opt/esp-idf/components/log /home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/managed_components/lvgl__lvgl /opt/esp-idf/components/lwip /home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/main /opt/esp-idf/components/mbedtls /opt/esp-idf/components/mqtt /opt/esp-idf/components/newlib /opt/esp-idf/components/nvs_flash /opt/esp-idf/components/nvs_sec_provider /opt/esp-idf/components/openthread /opt/esp-idf/components/partition_table /opt/esp-idf/components/perfmon /opt/esp-idf/components/protobuf-c /opt/esp-idf/components/protocomm /opt/esp-idf/components/pthread /opt/esp-idf/components/rt /opt/esp-idf/components/sdmmc /opt/esp-idf/components/soc /opt/esp-idf/components/spi_flash /opt/esp-idf/components/spiffs /opt/esp-idf/components/tcp_transport /opt/esp-idf/components/touch_element /opt/esp-idf/components/ulp /opt/esp-idf/components/unity /opt/esp-idf/components/usb /opt/esp-idf/components/vfs /opt/esp-idf/components/wear_levelling /opt/esp-idf/components/wifi_provisioning /opt/esp-idf/components/wpa_supplicant /home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/managed_components/wvirgil123__sscma_client /opt/esp-idf/components/xtensa
--- Configuring done (5.8s)
--- Generating done (0.4s)
--- Build files have been written to: /home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/build
-[16/54] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/hal/audio/es8311.c.obj
-/home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/main/hal/audio/es8311.c:17:18: warning: 'es8311_read_reg' defined but not used [-Wunused-function]
-   17 | static esp_err_t es8311_read_reg(es8311_handle_t *handle, uint8_t reg, uint8_t *value)
-      |                  ^~~~~~~~~~~~~~~
-[20/54] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/hal/audio/es7243e.c.obj
-/home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/main/hal/audio/es7243e.c:17:18: warning: 'es7243e_read_reg' defined but not used [-Wunused-function]
-   17 | static esp_err_t es7243e_read_reg(es7243e_handle_t *handle, uint8_t reg, uint8_t *value)
-      |                  ^~~~~~~~~~~~~~~~
-[35/54] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/hal/camera/sscma_client.c.obj
-FAILED: [code=1] esp-idf/main/CMakeFiles/__idf_main.dir/hal/camera/sscma_client.c.obj 
-/home/ming/.espressif/tools/xtensa-esp-elf/esp-14.2.0_20251107/xtensa-esp-elf/bin/xtensa-esp32s3-elf-gcc -DESP_PLATFORM -DIDF_VER=\"v5.5.2\" -DLV_CONF_INCLUDE_SIMPLE -DMBEDTLS_CONFIG_FILE=\"mbedtls/esp_config.h\" -DSOC_MMU_PAGE_SIZE=CONFIG_MMU_PAGE_SIZE -DSOC_XTAL_FREQ_MHZ=CONFIG_XTAL_FREQ -D_GLIBCXX_HAVE_POSIX_SEMAPHORE -D_GLIBCXX_USE_POSIX_SEMAPHORE -D_GNU_SOURCE -D_POSIX_READER_WRITER_LOCKS -I/home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/build/config -I/home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/main -I/opt/esp-idf/components/newlib/platform_include -I/opt/esp-idf/components/freertos/config/include -I/opt/esp-idf/components/freertos/config/include/freertos -I/opt/esp-idf/components/freertos/config/xtensa/include -I/opt/esp-idf/components/freertos/FreeRTOS-Kernel/include -I/opt/esp-idf/components/freertos/FreeRTOS-Kernel/portable/xtensa/include -I/opt/esp-idf/components/freertos/FreeRTOS-Kernel/portable/xtensa/include/freertos -I/opt/esp-idf/components/freertos/esp_additions/include -I/opt/esp-idf/components/esp_hw_support/include -I/opt/esp-idf/components/esp_hw_support/include/soc -I/opt/esp-idf/components/esp_hw_support/include/soc/esp32s3 -I/opt/esp-idf/components/esp_hw_support/dma/include -I/opt/esp-idf/components/esp_hw_support/ldo/include -I/opt/esp-idf/components/esp_hw_support/debug_probe/include -I/opt/esp-idf/components/esp_hw_support/mspi_timing_tuning/include -I/opt/esp-idf/components/esp_hw_support/mspi_timing_tuning/tuning_scheme_impl/include -I/opt/esp-idf/components/esp_hw_support/power_supply/include -I/opt/esp-idf/components/esp_hw_support/port/esp32s3/. -I/opt/esp-idf/components/esp_hw_support/port/esp32s3/include -I/opt/esp-idf/components/esp_hw_support/mspi_timing_tuning/port/esp32s3/. -I/opt/esp-idf/components/esp_hw_support/mspi_timing_tuning/port/esp32s3/include -I/opt/esp-idf/components/heap/include -I/opt/esp-idf/components/heap/tlsf -I/opt/esp-idf/components/log/include -I/opt/esp-idf/components/soc/include -I/opt/esp-idf/components/soc/esp32s3 -I/opt/esp-idf/components/soc/esp32s3/include -I/opt/esp-idf/components/soc/esp32s3/register -I/opt/esp-idf/components/hal/platform_port/include -I/opt/esp-idf/components/hal/esp32s3/include -I/opt/esp-idf/components/hal/include -I/opt/esp-idf/components/esp_rom/include -I/opt/esp-idf/components/esp_rom/esp32s3/include -I/opt/esp-idf/components/esp_rom/esp32s3/include/esp32s3 -I/opt/esp-idf/components/esp_rom/esp32s3 -I/opt/esp-idf/components/esp_common/include -I/opt/esp-idf/components/esp_system/include -I/opt/esp-idf/components/esp_system/port/soc -I/opt/esp-idf/components/esp_system/port/include/private -I/opt/esp-idf/components/xtensa/esp32s3/include -I/opt/esp-idf/components/xtensa/include -I/opt/esp-idf/components/xtensa/deprecated_include -I/opt/esp-idf/components/lwip/include -I/opt/esp-idf/components/lwip/include/apps -I/opt/esp-idf/components/lwip/include/apps/sntp -I/opt/esp-idf/components/lwip/lwip/src/include -I/opt/esp-idf/components/lwip/port/include -I/opt/esp-idf/components/lwip/port/freertos/include -I/opt/esp-idf/components/lwip/port/esp32xx/include -I/opt/esp-idf/components/lwip/port/esp32xx/include/arch -I/opt/esp-idf/components/lwip/port/esp32xx/include/sys -I/opt/esp-idf/components/nvs_flash/include -I/opt/esp-idf/components/esp_partition/include -I/opt/esp-idf/components/esp_wifi/include -I/opt/esp-idf/components/esp_wifi/include/local -I/opt/esp-idf/components/esp_wifi/wifi_apps/include -I/opt/esp-idf/components/esp_wifi/wifi_apps/nan_app/include -I/opt/esp-idf/components/esp_event/include -I/opt/esp-idf/components/esp_phy/include -I/opt/esp-idf/components/esp_phy/esp32s3/include -I/opt/esp-idf/components/esp_netif/include -I/opt/esp-idf/components/esp_http_client/include -I/opt/esp-idf/components/esp_http_server/include -I/opt/esp-idf/components/http_parser -I/opt/esp-idf/components/esp_https_ota/include -I/opt/esp-idf/components/bootloader_support/include -I/opt/esp-idf/components/bootloader_support/bootloader_flash/include -I/opt/esp-idf/components/esp_bootloader_format/include -I/opt/esp-idf/components/esp_app_format/include -I/opt/esp-idf/components/json/cJSON -I/opt/esp-idf/components/spiffs/include -I/opt/esp-idf/components/console -I/opt/esp-idf/components/vfs/include -I/opt/esp-idf/components/esp_vfs_console/include -I/opt/esp-idf/components/app_update/include -I/opt/esp-idf/components/esp-tls -I/opt/esp-idf/components/esp-tls/esp-tls-crypto -I/opt/esp-idf/components/mbedtls/port/include -I/opt/esp-idf/components/mbedtls/mbedtls/include -I/opt/esp-idf/components/mbedtls/mbedtls/library -I/opt/esp-idf/components/mbedtls/esp_crt_bundle/include -I/opt/esp-idf/components/mbedtls/mbedtls/3rdparty/everest/include -I/opt/esp-idf/components/mbedtls/mbedtls/3rdparty/p256-m -I/opt/esp-idf/components/mbedtls/mbedtls/3rdparty/p256-m/p256-m -I/opt/esp-idf/components/esp_timer/include -I/opt/esp-idf/components/driver/deprecated -I/opt/esp-idf/components/driver/i2c/include -I/opt/esp-idf/components/driver/touch_sensor/include -I/opt/esp-idf/components/driver/twai/include -I/opt/esp-idf/components/driver/touch_sensor/esp32s3/include -I/opt/esp-idf/components/esp_pm/include -I/opt/esp-idf/components/esp_ringbuf/include -I/opt/esp-idf/components/esp_driver_gpio/include -I/opt/esp-idf/components/esp_driver_pcnt/include -I/opt/esp-idf/components/esp_driver_gptimer/include -I/opt/esp-idf/components/esp_driver_spi/include -I/opt/esp-idf/components/esp_driver_mcpwm/include -I/opt/esp-idf/components/esp_driver_ana_cmpr/include -I/opt/esp-idf/components/esp_driver_i2s/include -I/opt/esp-idf/components/esp_driver_sdmmc/include -I/opt/esp-idf/components/sdmmc/include -I/opt/esp-idf/components/esp_driver_sdspi/include -I/opt/esp-idf/components/esp_driver_sdio/include -I/opt/esp-idf/components/esp_driver_dac/include -I/opt/esp-idf/components/esp_driver_rmt/include -I/opt/esp-idf/components/esp_driver_tsens/include -I/opt/esp-idf/components/esp_driver_sdm/include -I/opt/esp-idf/components/esp_driver_i2c/include -I/opt/esp-idf/components/esp_driver_uart/include -I/opt/esp-idf/components/esp_driver_ledc/include -I/opt/esp-idf/components/esp_driver_parlio/include -I/opt/esp-idf/components/esp_driver_usb_serial_jtag/include -I/opt/esp-idf/components/esp_driver_twai/include -I/opt/esp-idf/components/esp_adc/include -I/opt/esp-idf/components/esp_adc/interface -I/opt/esp-idf/components/esp_adc/esp32s3/include -I/opt/esp-idf/components/esp_adc/deprecated/include -I/opt/esp-idf/components/fatfs/diskio -I/opt/esp-idf/components/fatfs/src -I/opt/esp-idf/components/fatfs/vfs -I/opt/esp-idf/components/wear_levelling/include -I/home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/managed_components/espressif__esp_io_expander/include -I/home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/managed_components/espressif__esp_lvgl_port/include -I/opt/esp-idf/components/esp_lcd/include -I/opt/esp-idf/components/esp_lcd/interface -I/opt/esp-idf/components/esp_lcd/rgb/include -I/home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/managed_components/lvgl__lvgl -I/home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/managed_components/lvgl__lvgl/src -I/home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/managed_components -I/home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/managed_components/lvgl__lvgl/examples -I/home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/managed_components/lvgl__lvgl/demos -I/home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/managed_components/wvirgil123__sscma_client/include -I/home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/managed_components/wvirgil123__sscma_client/interface -mlongcalls  -fno-builtin-memcpy -fno-builtin-memset -fno-builtin-bzero -fno-builtin-stpcpy -fno-builtin-strncpy -fdiagnostics-color=always -ffunction-sections -fdata-sections -Wall -Werror=all -Wno-error=unused-function -Wno-error=unused-variable -Wno-error=unused-but-set-variable -Wno-error=deprecated-declarations -Wextra -Wno-error=extra -Wno-unused-parameter -Wno-sign-compare -Wno-enum-conversion -gdwarf-4 -ggdb -mdisable-hardware-atomics -Og -fno-shrink-wrap -fmacro-prefix-map=/home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw=. -fmacro-prefix-map=/opt/esp-idf=/IDF -fstrict-volatile-bitfields -fno-jump-tables -fno-tree-switch-conversion -std=gnu17 -Wno-old-style-declaration -MD -MT esp-idf/main/CMakeFiles/__idf_main.dir/hal/camera/sscma_client.c.obj -MF esp-idf/main/CMakeFiles/__idf_main.dir/hal/camera/sscma_client.c.obj.d -o esp-idf/main/CMakeFiles/__idf_main.dir/hal/camera/sscma_client.c.obj -c /home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/main/hal/camera/sscma_client.c
-In file included from /home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/main/hal/camera/sscma_client.c:5:
-/home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/managed_components/wvirgil123__sscma_client/include/sscma_client_ops.h:77:11: error: conflicting types for 'sscma_client_init'; have 'esp_err_t(struct sscma_client_t *)' {aka 'int(struct sscma_client_t *)'}
-   77 | esp_err_t sscma_client_init(sscma_client_handle_t client);
-      |           ^~~~~~~~~~~~~~~~~
-In file included from /home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/main/hal/camera/sscma_client.c:1:
-/home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/main/hal/camera/sscma_client.h:17:11: note: previous declaration of 'sscma_client_init' with type 'esp_err_t(void)' {aka 'int(void)'}
-   17 | esp_err_t sscma_client_init(void);
-      |           ^~~~~~~~~~~~~~~~~
-/home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/main/hal/camera/sscma_client.c: In function 'sscma_client_init':
-/home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/main/hal/camera/sscma_client.c:54:24: error: initialization of 'esp_io_expander_t *' {aka 'struct esp_io_expander_s *'} from incompatible pointer type 'i2c_master_bus_handle_t' {aka 'struct i2c_master_bus_t *'} [-Wincompatible-pointer-types]
-   54 |         .io_expander = hal_io_exp_get_i2c_bus(),
-      |                        ^~~~~~~~~~~~~~~~~~~~~~
-/home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/main/hal/camera/sscma_client.c:54:24: note: (near initialization for 'io_cfg.io_expander')
-In file included from /home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/main/hal/camera/sscma_client.h:4:
-/home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/main/hal/camera/sscma_client.c:61:80: error: 'SPI2_HOST' undeclared (first use in this function); did you mean 'SPI2_MOSI'?
-   61 |     ESP_ERROR_CHECK(sscma_client_new_io_spi_bus((sscma_client_spi_bus_handle_t)SPI2_HOST, &io_cfg, &io_handle));
-      |                                                                                ^~~~~~~~~
-/opt/esp-idf/components/esp_common/include/esp_err.h:116:30: note: in definition of macro 'ESP_ERROR_CHECK'
-  116 |         esp_err_t err_rc_ = (x);                                        \
-      |                              ^
-/home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/main/hal/camera/sscma_client.c:61:80: note: each undeclared identifier is reported only once for each function it appears in
-   61 |     ESP_ERROR_CHECK(sscma_client_new_io_spi_bus((sscma_client_spi_bus_handle_t)SPI2_HOST, &io_cfg, &io_handle));
-      |                                                                                ^~~~~~~~~
-/opt/esp-idf/components/esp_common/include/esp_err.h:116:30: note: in definition of macro 'ESP_ERROR_CHECK'
-  116 |         esp_err_t err_rc_ = (x);                                        \
-      |                              ^
-/home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/main/hal/camera/sscma_client.c:66:28: error: assignment to 'esp_io_expander_handle_t' {aka 'struct esp_io_expander_s *'} from incompatible pointer type 'i2c_master_bus_handle_t' {aka 'struct i2c_master_bus_t *'} [-Wincompatible-pointer-types]
-   66 |     client_cfg.io_expander = hal_io_exp_get_i2c_bus();
-      |                            ^
-[36/54] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/hal/input/hal_button.c.obj
-/home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/main/hal/input/hal_button.c:76:1: warning: ignoring attribute 'section (".iram1.1")' because it conflicts with previous 'section (".iram1.0")' [-Wattributes]
-   76 | {
-      | ^
-/home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/main/hal/input/hal_button.c:42:23: note: previous declaration here
-   42 | static void IRAM_ATTR boot_button_isr_handler(void *arg);
-      |                       ^~~~~~~~~~~~~~~~~~~~~~~
-[37/54] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/hal/input/hal_encoder.c.obj
-/home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/main/hal/input/hal_encoder.c: In function 'encoder_isr_handler':
-/home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/main/hal/input/hal_encoder.c:73:17: warning: unused variable 'current_count' [-Wunused-variable]
-   73 |         int32_t current_count = s_encoder.count;
-      |                 ^~~~~~~~~~~~~
-[1/1] cd /home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/build/bootloader/esp-idf/esptool_py ...ootloader 0x0 /home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/build/bootloader/bootloader.bin
-Bootloader binary size 0x57e0 bytes. 0x2820 bytes (31%) free.
-[45/54] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/hal/display/lvgl_port.c.obj
-ninja: build stopped: subcommand failed.
-ninja failed with exit code 1, output of the command is in the /home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/build/log/idf_py_stderr_output_3606440 and /home/ming/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw/build/log/idf_py_stdout_output_3606440
+del: glm-4.7, body: 7900 bytes)
+I (24514) llm: LLM tools request (7900 bytes): {"model":"glm-4.7","max_completion_tokens":4096,"messages":[{"role":"system","content":"# MimiClaw\n\nYou are MimiClaw, a personal AI assistant running on an ES ...
+I (24534) llm: Custom URL: base='https://api.coolyeah.net/v1' + endpoint='/chat/completions' = 'https://api.coolyeah.net/v1/chat/completions'
+I (24554) llm: API URL: https://api.coolyeah.net/v1/chat/completions
+I (25884) telegram: Message update_id=29221603 message_id=108 from chat 8663478141: 你还活着吗...
+I (27624) llm: LLM tools raw response (814 bytes): {"choices":[{"finish_reason":"stop","index":0,"message":{"content":"当然还活着！🐾 我是 MimiClaw，在 ESP32-S3 上运行正常。\n\n有什么我可� ...
+I (27644) llm: Response: 107 bytes text, 0 tool calls, stop=end_turn
+I (28764) agent: Session saved for chat 8663478141
+I (28764) agent: Queue final response to telegram:8663478141 (107 bytes)
+I (28764) agent: Free PSRAM: 8153000 bytes
+I (28774) agent: Processing message from telegram:8663478141
+E (29574) esp-tls-mbedtls: mbedtls_ssl_handshake returned -0x7280
+E (29574) esp-tls: Failed to open new connection
+E (29574) proxy: TLS handshake failed over proxy tunnel
+I (30994) skills: Skills summary: 221 bytes
+I (30994) context: System prompt built: 2953 bytes
+I (30994) agent: LLM turn context: channel=telegram chat_id=8663478141
+I (31024) llm: Calling LLM API with tools (provider: openai, model: glm-4.7, body: 8087 bytes)
+I (31024) llm: LLM tools request (8087 bytes): {"model":"glm-4.7","max_completion_tokens":4096,"messages":[{"role":"system","content":"# MimiClaw\n\nYou are MimiClaw, a personal AI assistant running on an ES ...
+I (31054) llm: Custom URL: base='https://api.coolyeah.net/v1' + endpoint='/chat/completions' = 'https://api.coolyeah.net/v1/chat/completions'
+I (31064) llm: API URL: https://api.coolyeah.net/v1/chat/completions
+I (34484) llm: LLM tools raw response (899 bytes): {"choices":[{"finish_reason":"stop","index":0,"message":{"content":"是的，我还活着！🤖\n\n随时待命，有什么需要帮忙的吗？","reasoning_co ...
+I (34504) llm: Response: 75 bytes text, 0 tool calls, stop=end_turn
 
-╭─░▒▓     ~/data/Project/ClionProject/ESP32/SenseCAP_Watcher_mimiclaw  on    main ⇡8 !10 ?6 ▓▒░                                                      ░▒▓ 2 ✘  took 7s    idf55    with ming@Archlinux  at 04:45:11   ▓▒░─╮
-╰─                                                                                                                                               
+
+
+
+
+I (45764) telegram: Sending telegram chunk to 8663478141 (75 bytes)
+E (50864) esp-tls-mbedtls: mbedtls_ssl_handshake returned -0x7280
+E (50864) esp-tls: Failed to open new connection
+E (50864) proxy: TLS handshake failed over proxy tunnel
+I (55064) telegram: Telegram send success to 8663478141 (75 bytes)
+I (55064) mimi: Telegram send success for 8663478141 (75 bytes)
+I (59684) telegram: Message update_id=29221604 message_id=113 from chat 8663478141: 拍张照片给我...
+I (59684) agent: Processing message from telegram:8663478141
+I (61904) skills: Skills summary: 221 bytes
+I (61904) context: System prompt built: 2953 bytes
+I (61904) agent: LLM turn context: channel=telegram chat_id=8663478141
+I (61914) mimi: Dispatching response to telegram:8663478141
+I (61914) telegram: Sending telegram chunk to 8663478141 (22 bytes)
+I (61934) llm: Calling LLM API with tools (provider: openai, model: glm-4.7, body: 8245 bytes)
+I (61934) llm: LLM tools request (8245 bytes): {"model":"glm-4.7","max_completion_tokens":4096,"messages":[{"role":"system","content":"# MimiClaw\n\nYou are MimiClaw, a personal AI assistant running on an ES ...
+I (61954) llm: Custom URL: base='https://api.coolyeah.net/v1' + endpoint='/chat/completions' = 'https://api.coolyeah.net/v1/chat/completions'
+I (61964) llm: API URL: https://api.coolyeah.net/v1/chat/completions
+I (65414) llm: LLM tools raw response (1253 bytes): {"id":"msg_60bea9c8-ff86-4be2-b15d-bce992caf8d9","model":"glm-4.7","object":"chat.completion","created":1772595689,"choices":[{"index":0,"message":{"role":"assi ...
+I (65424) llm: Response: 0 bytes text, 1 tool calls, stop=tool_use
+I (65424) agent: Tool use iteration 1: 1 calls
+I (65434) tools: Executing tool: camera_capture
+I (65434) tool_camera: Capturing photo...
+E (65544) spi_master: spi_master_init_driver(282): host_id not initialized
+E (65544) sscma_client.io.spi: sscma_client_new_io_spi_bus(77): adding spi device to bus failed
+ESP_ERROR_CHECK failed: esp_err_t 0x103 (ESP_ERR_INVALID_STATE) at 0x4201915b
+--- 0x4201915b: sscma_hal_init at /home/ming/data/Project/ClionProject/ESP32/mimiclaw/main/hal/camera/sscma_client.c:63
+file: "./main/hal/camera/sscma_client.c" line 63
+func: sscma_hal_init
+expression: sscma_client_new_io_spi_bus((sscma_client_spi_bus_handle_t)SPI2_HOST, &io_cfg, &io_handle)
+
+abort() was called at PC 0x40380d2b on core 1
+--- 0x40380d2b: _esp_error_check_failed at /opt/esp-idf/components/esp_system/esp_err.c:49
+
+
+Backtrace: 0x40380d6d:0x3fccaf70 0x40380d35:0x3fccaf90 0x4038a6cd:0x3fccafb0 0x40380d2b:0x3fccb020 0x4201915b:0x3fccb050 0x420177ef:0x3fccb0e0 0x42016c84:0x3fccb100 0x420156a5:0x3fccb130 0x420119f0:0x3fccb150 0x42011ced:0x3fccb190 0x40381b31:0x3fccb3d0
+--- 0x40380d6d: panic_abort at /opt/esp-idf/components/esp_system/panic.c:477
+--- 0x40380d35: esp_system_abort at /opt/esp-idf/components/esp_system/port/esp_system_chip.c:87
+--- 0x4038a6cd: abort at /opt/esp-idf/components/newlib/src/abort.c:38
+--- 0x40380d2b: _esp_error_check_failed at /opt/esp-idf/components/esp_system/esp_err.c:49
+--- 0x4201915b: sscma_hal_init at /home/ming/data/Project/ClionProject/ESP32/mimiclaw/main/hal/camera/sscma_client.c:63
+--- 0x420177ef: hal_camera_init at /home/ming/data/Project/ClionProject/ESP32/mimiclaw/main/hal/camera/hal_camera.c:12
+--- 0x42016c84: tool_camera_execute at /home/ming/data/Project/ClionProject/ESP32/mimiclaw/main/tools/tool_camera.c:34
+--- 0x420156a5: tool_registry_execute at /home/ming/data/Project/ClionProject/ESP32/mimiclaw/main/tools/tool_registry.c:239
+--- 0x420119f0: build_tool_results at /home/ming/data/Project/ClionProject/ESP32/mimiclaw/main/agent/agent_loop.c:155
+--- 0x42011ced: agent_loop_task at /home/ming/data/Project/ClionProject/ESP32/mimiclaw/main/agent/agent_loop.c:263
+--- 0x40381b31: vPortTaskWrapper at /opt/esp-idf/components/freertos/FreeRTOS-Kernel/portable/xtensa/port.c:139
+
+
+
+
+ELF file SHA256: c23ba8c35
+
+Rebooting...
+ESP-ROM:esp32s3-20210327
+Build:Mar 27 2021
+rst:0xc (RTC_SW_CPU_RST),boot:0x8 (SPI_FAST_FLASH_BOOT)
+Saved PC:0x4037c686
+--- 0x4037c686: esp_cpu_wait_for_intr at /opt/esp-idf/components/esp_hw_support/cpu.c:64
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fce2820,len:0x1700
+load:0x403c8700,len:0xec0
+--- 0x403c8700: _stext at ??:?
+load:0x403cb700,len:0x31c0
+entry 0x403c894c
+--- 0x403c894c: call_start_cpu0 at /opt/esp-idf/components/bootloader/subproject/main/bootloader_start.c:25
+I (29) boot: ESP-IDF v5.5.2 2nd stage bootloader
+I (29) boot: compile time Mar  4 2026 11:35:25
+I (29) boot: Multicore bootloader
+I (29) boot: chip revision: v0.2
+I (32) boot: efuse block revision: v1.3
+I (36) qio_mode: Enabling QIO for flash chip WinBond
+I (40) boot.esp32s3: Boot SPI Speed : 80MHz
+I (44) boot.esp32s3: SPI Mode       : QIO
+I (48) boot.esp32s3: SPI Flash Size : 16MB
+I (52) boot: Enabling RNG early entropy source...
+I (56) boot: Partition Table:
+I (59) boot: ## Label            Usage          Type ST Offset   Length
+I (65) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (72) boot:  1 otadata          OTA data         01 00 0000f000 00002000
+I (78) boot:  2 phy_init         RF data          01 01 00011000 00001000
+I (85) boot:  3 ota_0            OTA app          00 10 00020000 00200000
+I (91) boot:  4 ota_1            OTA app          00 11 00220000 00200000
+I (98) boot:  5 spiffs           Unknown data     01 82 00420000 00bd0000
+I (104) boot:  6 coredump         Unknown data     01 03 00ff0000 00010000
+I (111) boot: End of partition table
+I (114) esp_image: segment 0: paddr=00020020 vaddr=3c120020 size=4af9ch (307100) map
+I (168) esp_image: segment 1: paddr=0006afc4 vaddr=3fca1000 size=05054h ( 20564) load
+I (172) esp_image: segment 2: paddr=00070020 vaddr=42000020 size=11f8d0h (1177808) map
+I (348) esp_image: segment 3: paddr=0018f8f8 vaddr=3fca6054 size=00530h (  1328) load
+I (348) esp_image: segment 4: paddr=0018fe30 vaddr=40374000 size=1cef8h (118520) load
+I (374) esp_image: segment 5: paddr=001acd30 vaddr=50000000 size=00020h (    32) load
+I (385) boot: Loaded app from partition at offset 0x20000
+I (386) boot: Disabling RNG early entropy source...
+I (396) octal_psram: vendor id    : 0x0d (AP)
+I (396) octal_psram: dev id       : 0x02 (generation 3)
+I (396) octal_psram: density      : 0x03 (64 Mbit)
+I (398) octal_psram: good-die     : 0x01 (Pass)
+I (402) octal_psram: Latency      : 0x01 (Fixed)
+I (407) octal_psram: VCC          : 0x01 (3V)
+I (411) octal_psram: SRF          : 0x01 (Fast Refresh)
+I (416) octal_psram: BurstType    : 0x01 (Hybrid Wrap)
+I (421) octal_psram: BurstLen     : 0x01 (32 Byte)
+I (425) octal_psram: Readlatency  : 0x02 (10 cycles@Fixed)
+I (430) octal_psram: DriveStrength: 0x00 (1/1)
+I (435) MSPI Timing: Enter psram timing tuning
+I (439) esp_psram: Found 8MB PSRAM device
+
+我看到亮灯了！但是没效果！好像设备重启了？
+
+
+
+I (7515) cron: Cron service started (0 jobs, check every 60s)
+I (7515) heartbeat: Heartbeat started (every 30 min)
+I (7535) ws: WebSocket server started on port 18789
+I (7535) mimi: All services started!
+I (7535) mimi: MimiClaw ready. Type 'help' for CLI commands.
+I (7545) main_task: Returned from app_main()
+I (60185) telegram: Message update_id=29221605 message_id=115 from chat 8663478141: 显示helloworld...
+I (60185) agent: Processing message from telegram:8663478141
+I (62825) skills: Skills summary: 221 bytes
+I (62825) context: System prompt built: 2953 bytes
+I (62825) agent: LLM turn context: channel=telegram chat_id=8663478141
+I (62845) mimi: Dispatching response to telegram:8663478141
+I (62845) telegram: Sending telegram chunk to 8663478141 (22 bytes)
+I (62855) llm: Calling LLM API with tools (provider: openai, model: glm-4.7, body: 8243 bytes)
+I (62855) llm: LLM tools request (8243 bytes): {"model":"glm-4.7","max_completion_tokens":4096,"messages":[{"role":"system","content":"# MimiClaw\n\nYou are MimiClaw, a personal AI assistant running on an ES ...
+I (62875) llm: Custom URL: base='https://api.coolyeah.net/v1' + endpoint='/chat/completions' = 'https://api.coolyeah.net/v1/chat/completions'
+I (62895) llm: API URL: https://api.coolyeah.net/v1/chat/completions
+E (65295) esp-tls-mbedtls: mbedtls_ssl_handshake returned -0x7280
+E (65295) esp-tls: Failed to open new connection
+E (65295) proxy: TLS handshake failed over proxy tunnel
+I (65505) llm: LLM tools raw response (887 bytes): {"id":"msg_37264e70-024d-49dc-9c94-244f2f522205","model":"glm-4.7","object":"chat.completion","created":1772595754,"choices":[{"index":0,"message":{"role":"assi ...
+I (65515) llm: Response: 0 bytes text, 1 tool calls, stop=tool_use
+I (65515) agent: Tool use iteration 1: 1 calls
+I (65525) tools: Executing tool: display_text
+I (65525) tool_display: Displaying text: helloworld
+I (65525) agent: Tool display_text result: 31 bytes
+I (65555) llm: Calling LLM API with tools (provider: openai, model: glm-4.7, body: 8559 bytes)
+I (65555) llm: LLM tools request (8559 bytes): {"model":"glm-4.7","max_completion_tokens":4096,"messages":[{"role":"system","content":"# MimiClaw\n\nYou are MimiClaw, a personal AI assistant running on an ES ...
+I (65575) llm: Custom URL: base='https://api.coolyeah.net/v1' + endpoint='/chat/completions' = 'https://api.coolyeah.net/v1/chat/completions'
+I (65595) llm: API URL: https://api.coolyeah.net/v1/chat/completions
+I (67135) llm: LLM tools raw response (629 bytes): {"id":"b09f1b0b7d634ea7888419210c037127","model":"z-ai/glm4.7","object":"chat.completion","created":1772595756,"choices":[{"index":0,"message":{"role":"assistan ...
+I (67155) llm: Response: 38 bytes text, 0 tool calls, stop=end_turn
+I (67175) agent: Session saved for chat 8663478141
+I (67175) agent: Queue final response to telegram:8663478141 (38 bytes)
+I (67175) agent: Free PSRAM: 8172588 bytes
+I (67855) telegram: Telegram send success to 8663478141 (22 bytes)
+I (67855) mimi: Telegram send success for 8663478141 (22 bytes)
+I (67855) mimi: Dispatching response to telegram:8663478141
+I (67865) telegram: Sending telegram chunk to 8663478141 (38 bytes)
+I (73485) telegram: Telegram send success to 8663478141 (38 bytes)
+I (73485) mimi: Telegram send success for 8663478141 (38 bytes)
+
+还是黑屏！但是背光正确！
