@@ -12,7 +12,11 @@ static void lvgl_flush_cb(lv_display_t *disp, const lv_area_t *area, uint8_t *px
 {
     uint16_t w = lv_area_get_width(area);
     uint16_t h = lv_area_get_height(area);
-    hal_display_draw(area->x1, area->y1, area->x2, area->y2, (uint16_t *)px_map, w * h);
+    esp_err_t ret = hal_display_draw(area->x1, area->y1, area->x2, area->y2, (uint16_t *)px_map, w * h);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Display draw failed: %s (area: %d,%d-%d,%d, pixels: %d)",
+                 esp_err_to_name(ret), area->x1, area->y1, area->x2, area->y2, w * h);
+    }
     lv_display_flush_ready(disp);
 }
 

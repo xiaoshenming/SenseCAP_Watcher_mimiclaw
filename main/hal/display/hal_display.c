@@ -50,6 +50,14 @@ esp_err_t hal_display_init(void)
 
     s_display.initialized = true;
     s_display.backlight_on = true;
+
+    /* Test: Fill screen with white for 5 seconds */
+    ESP_LOGI(TAG, "Testing display: WHITE for 5 sec...");
+    hal_display_fill(0xFFFF);
+    vTaskDelay(pdMS_TO_TICKS(5000));
+    ESP_LOGI(TAG, "Testing display: BLACK");
+    hal_display_fill(0x0000);
+
     ESP_LOGI(TAG, "Display HAL initialized (%dx%d)", LCD_WIDTH, LCD_HEIGHT);
     return ESP_OK;
 
@@ -138,18 +146,29 @@ esp_err_t hal_display_draw(uint16_t x0, uint16_t y0,
                             const uint16_t *data, size_t pixel_count)
 {
     if (!s_display.initialized) {
+        ESP_LOGE(TAG, "Display not initialized");
         return ESP_ERR_INVALID_STATE;
     }
     if (!data || pixel_count == 0) {
+        ESP_LOGE(TAG, "Invalid data or pixel_count");
         return ESP_ERR_INVALID_ARG;
     }
+
+    ESP_LOGI(TAG, "Drawing area (%d,%d)-(%d,%d), %zu pixels", x0, y0, x1, y1, pixel_count);
 
     esp_err_t ret;
 
     ret = spd2010_set_window(x0, y0, x1, y1);
-    if (ret != ESP_OK) return ret;
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "set_window failed: %s", esp_err_to_name(ret));
+        return ret;
+    }
 
-    return spd2010_write_pixels(data, pixel_count);
+    ret = spd2010_write_pixels(data, pixel_count);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "write_pixels failed: %s", esp_err_to_name(ret));
+    }
+    return ret;
 }
 
 esp_err_t hal_display_set_backlight(bool on)

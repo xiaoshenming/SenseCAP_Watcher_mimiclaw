@@ -87,17 +87,20 @@ esp_err_t sscma_hal_init(void)
 
     s_image_queue = xQueueCreate(1, sizeof(image_data_t));
 
-    esp_err_t init_ret = sscma_client_init(s_client);
-    if (init_ret != ESP_OK) {
-        ESP_LOGE(TAG, "sscma_client_init failed: %s", esp_err_to_name(init_ret));
+    sscma_client_init(s_client);
+    ESP_LOGI(TAG, "SSCMA client init called");
+
+    /* Set sensor resolution: 1=enable, 3=640x480 */
+    esp_err_t sensor_ret = sscma_client_set_sensor(s_client, 1, 3, true);
+    if (sensor_ret != ESP_OK) {
+        ESP_LOGE(TAG, "sscma_client_set_sensor failed: %s", esp_err_to_name(sensor_ret));
         sscma_client_del(s_client);
         s_client = NULL;
         hal_io_exp_set_power(IO_EXP_PWR_AI_CHIP, false);
-        return init_ret;
+        return sensor_ret;
     }
-    vTaskDelay(pdMS_TO_TICKS(2000));
 
-    ESP_LOGI(TAG, "SSCMA client initialized");
+    ESP_LOGI(TAG, "SSCMA client initialized with sensor set");
     return ESP_OK;
 }
 
