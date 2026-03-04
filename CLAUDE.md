@@ -39,10 +39,10 @@ idf.py fullclean && idf.py build
 idf.py build && idf.py flash monitor
 
 # 只烧录 + 查看日志
-idf.py -p /dev/ttyUSB0 flash monitor
+idf.py build &&  idf.py flash monitor 
 
 # 只查看日志（不烧录）
-idf.py -p /dev/ttyUSB0 monitor
+idf.py build &&  idf.py  monitor 
 
 # 退出串口监视：Ctrl + ]
 ```

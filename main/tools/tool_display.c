@@ -54,6 +54,7 @@ esp_err_t tool_display_execute(const char *input_json, char *output, size_t outp
     }
 
     lv_label_set_text(s_label, text_copy);
+    lv_refr_now(NULL);
 
     lvgl_port_unlock();
 

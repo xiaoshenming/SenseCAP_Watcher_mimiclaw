@@ -62,11 +62,16 @@ esp_err_t hal_sd_init(void)
             .max_transfer_sz = 4096,
         };
         ret = spi_bus_initialize(SPI2_HOST, &bus_cfg, SPI_DMA_CH_AUTO);
-        if (ret != ESP_OK) {
+        if (ret == ESP_ERR_INVALID_STATE) {
+            /* SPI2 already initialized externally (by hal_init), reuse it */
+            ESP_LOGI(TAG, "SPI2 bus already initialized, reusing");
+            s_sd.bus_initialized = true;
+        } else if (ret != ESP_OK) {
             ESP_LOGE(TAG, "Failed to init SPI bus: %s", esp_err_to_name(ret));
             goto err_power;
+        } else {
+            s_sd.bus_initialized = true;
         }
-        s_sd.bus_initialized = true;
     }
 
     /* \u914d\u7f6e SD SPI \u8bbe\u5907 */
@@ -125,10 +130,7 @@ esp_err_t hal_sd_deinit(void)
     s_sd.mounted = false;
 
     /* \u91ca\u653e SPI \u603b\u7ebf */
-    if (s_sd.bus_initialized) {
-        spi_bus_free(SPI2_HOST);
-        s_sd.bus_initialized = false;
-    }
+    /* SPI2 bus is shared with SSCMA camera, do not free it here */
 
     /* \u5173\u95ed SD \u5361\u7535\u6e90 */
     hal_io_exp_set_power(IO_EXP_PWR_SDCARD, false);

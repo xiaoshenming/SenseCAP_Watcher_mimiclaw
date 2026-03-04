@@ -29,9 +29,10 @@ esp_err_t hal_lvgl_init(void)
 
     /* Allocate draw buffers */
     size_t buf_size = LCD_WIDTH * 40;
-    void *buf1 = heap_caps_malloc(buf_size * sizeof(lv_color_t), MALLOC_CAP_SPIRAM);
-    void *buf2 = heap_caps_malloc(buf_size * sizeof(lv_color_t), MALLOC_CAP_SPIRAM);
-    lv_display_set_buffers(disp, buf1, buf2, buf_size, LV_DISPLAY_RENDER_MODE_PARTIAL);
+    size_t buf_bytes = buf_size * sizeof(lv_color_t);
+    void *buf1 = heap_caps_malloc(buf_bytes, MALLOC_CAP_SPIRAM);
+    void *buf2 = heap_caps_malloc(buf_bytes, MALLOC_CAP_SPIRAM);
+    lv_display_set_buffers(disp, buf1, buf2, buf_bytes, LV_DISPLAY_RENDER_MODE_PARTIAL);
 
     s_initialized = true;
     ESP_LOGI(TAG, "LVGL initialized");

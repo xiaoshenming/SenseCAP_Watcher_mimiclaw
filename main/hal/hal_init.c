@@ -12,6 +12,7 @@
 #include "sd_card/hal_sd.h"
 
 #include "esp_log.h"
+#include "driver/spi_common.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
@@ -46,6 +47,24 @@ esp_err_t watcher_hal_init(void)
     hal_power_enable(HAL_PWR_BAT_ADC, true);
     vTaskDelay(pdMS_TO_TICKS(50));  /* Let power stabilize */
     ESP_LOGI(TAG, "[2/8] Power OK");
+
+    /* 2.5. SPI2 bus - shared by SD card and SSCMA camera */
+    ESP_LOGI(TAG, "[2.5/8] SPI2 bus...");
+    spi_bus_config_t spi2_cfg = {
+        .mosi_io_num = SPI2_MOSI,
+        .miso_io_num = SPI2_MISO,
+        .sclk_io_num = SPI2_SCLK,
+        .quadwp_io_num = -1,
+        .quadhd_io_num = -1,
+        .isr_cpu_id = ESP_INTR_CPU_AFFINITY_1,
+        .max_transfer_sz = 4096,
+    };
+    ret = spi_bus_initialize(SPI2_HOST, &spi2_cfg, SPI_DMA_CH_AUTO);
+    if (ret != ESP_OK && ret != ESP_ERR_INVALID_STATE) {
+        ESP_LOGE(TAG, "SPI2 bus init FAILED: %s - aborting", esp_err_to_name(ret));
+        return ret;
+    }
+    ESP_LOGI(TAG, "[2.5/8] SPI2 bus OK");
 
     /* 3. Display */
     ESP_LOGI(TAG, "[3/8] Display (SPD2010 QSPI)...");

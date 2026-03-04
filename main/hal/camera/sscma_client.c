@@ -60,7 +60,12 @@ esp_err_t sscma_hal_init(void)
     };
 
     sscma_client_io_handle_t io_handle;
-    ESP_ERROR_CHECK(sscma_client_new_io_spi_bus((sscma_client_spi_bus_handle_t)SPI2_HOST, &io_cfg, &io_handle));
+    esp_err_t io_ret = sscma_client_new_io_spi_bus((sscma_client_spi_bus_handle_t)SPI2_HOST, &io_cfg, &io_handle);
+    if (io_ret != ESP_OK) {
+        ESP_LOGE(TAG, "sscma_client_new_io_spi_bus failed: %s", esp_err_to_name(io_ret));
+        hal_io_exp_set_power(IO_EXP_PWR_AI_CHIP, false);
+        return io_ret;
+    }
 
     sscma_client_config_t client_cfg = SSCMA_CLIENT_CONFIG_DEFAULT();
     client_cfg.reset_gpio_num = 7;
@@ -68,7 +73,12 @@ esp_err_t sscma_hal_init(void)
     client_cfg.io_expander = NULL;
     client_cfg.flags.reset_use_expander = 0;
 
-    ESP_ERROR_CHECK(sscma_client_new(io_handle, &client_cfg, &s_client));
+    esp_err_t client_ret = sscma_client_new(io_handle, &client_cfg, &s_client);
+    if (client_ret != ESP_OK) {
+        ESP_LOGE(TAG, "sscma_client_new failed: %s", esp_err_to_name(client_ret));
+        hal_io_exp_set_power(IO_EXP_PWR_AI_CHIP, false);
+        return client_ret;
+    }
 
     sscma_client_callback_t cb = {
         .on_event = on_event_cb,
@@ -77,7 +87,14 @@ esp_err_t sscma_hal_init(void)
 
     s_image_queue = xQueueCreate(1, sizeof(image_data_t));
 
-    ESP_ERROR_CHECK(sscma_client_init(s_client));
+    esp_err_t init_ret = sscma_client_init(s_client);
+    if (init_ret != ESP_OK) {
+        ESP_LOGE(TAG, "sscma_client_init failed: %s", esp_err_to_name(init_ret));
+        sscma_client_del(s_client);
+        s_client = NULL;
+        hal_io_exp_set_power(IO_EXP_PWR_AI_CHIP, false);
+        return init_ret;
+    }
     vTaskDelay(pdMS_TO_TICKS(2000));
 
     ESP_LOGI(TAG, "SSCMA client initialized");
