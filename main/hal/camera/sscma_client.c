@@ -55,7 +55,7 @@ esp_err_t sscma_hal_init(void)
         .trans_queue_depth = 1,
         .io_expander = NULL,
         .flags = {
-            .sync_use_expander = 1,
+            .sync_use_expander = 0,
         }
     };
 
@@ -66,7 +66,7 @@ esp_err_t sscma_hal_init(void)
     client_cfg.reset_gpio_num = 7;
     client_cfg.rx_buffer_size = 98304;
     client_cfg.io_expander = NULL;
-    client_cfg.flags.reset_use_expander = 1;
+    client_cfg.flags.reset_use_expander = 0;
 
     ESP_ERROR_CHECK(sscma_client_new(io_handle, &client_cfg, &s_client));
 

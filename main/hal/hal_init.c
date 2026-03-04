@@ -3,6 +3,7 @@
 #include "io_expander/hal_io_exp.h"
 #include "power/hal_power.h"
 #include "display/hal_display.h"
+#include "display/lvgl_port.h"
 #include "audio/hal_audio.h"
 #include "touch/hal_touch.h"
 #include "led/hal_led.h"
@@ -55,6 +56,15 @@ esp_err_t watcher_hal_init(void)
         return ret;
     }
     ESP_LOGI(TAG, "[3/8] Display OK");
+
+    /* 3.5. LVGL */
+    ESP_LOGI(TAG, "[3.5/8] LVGL...");
+    ret = hal_lvgl_init();
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "LVGL init FAILED: %s", esp_err_to_name(ret));
+        return ret;
+    }
+    ESP_LOGI(TAG, "[3.5/8] LVGL OK");
 
     /* 4. Audio */
     ESP_LOGI(TAG, "[4/8] Audio (ES8311 + ES7243E)...");

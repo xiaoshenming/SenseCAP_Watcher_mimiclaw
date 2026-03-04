@@ -23,20 +23,15 @@ esp_err_t hal_lvgl_init(void)
     const lvgl_port_cfg_t cfg = ESP_LVGL_PORT_INIT_CONFIG();
     ESP_ERROR_CHECK(lvgl_port_init(&cfg));
 
-    const lvgl_port_display_cfg_t disp_cfg = {
-        .io_handle = NULL,
-        .panel_handle = NULL,
-        .buffer_size = LCD_WIDTH * 40,
-        .double_buffer = true,
-        .hres = LCD_WIDTH,
-        .vres = LCD_HEIGHT,
-        .monochrome = false,
-        .rotation = {.swap_xy = false, .mirror_x = false, .mirror_y = false},
-        .flags = {.buff_dma = true, .buff_spiram = true}
-    };
-
-    lv_display_t *disp = lvgl_port_add_disp(&disp_cfg);
+    /* Create display using LVGL native API */
+    lv_display_t *disp = lv_display_create(LCD_WIDTH, LCD_HEIGHT);
     lv_display_set_flush_cb(disp, lvgl_flush_cb);
+
+    /* Allocate draw buffers */
+    size_t buf_size = LCD_WIDTH * 40;
+    void *buf1 = heap_caps_malloc(buf_size * sizeof(lv_color_t), MALLOC_CAP_SPIRAM);
+    void *buf2 = heap_caps_malloc(buf_size * sizeof(lv_color_t), MALLOC_CAP_SPIRAM);
+    lv_display_set_buffers(disp, buf1, buf2, buf_size, LV_DISPLAY_RENDER_MODE_PARTIAL);
 
     s_initialized = true;
     ESP_LOGI(TAG, "LVGL initialized");

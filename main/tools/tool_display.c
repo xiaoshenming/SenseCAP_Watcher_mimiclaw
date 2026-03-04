@@ -6,8 +6,6 @@
 #include "esp_lvgl_port.h"
 #include "lvgl.h"
 
-static bool s_lvgl_ready = false;
-
 static const char *TAG = "tool_display";
 
 /* Persistent label widget - created once, updated on each call */
@@ -37,16 +35,6 @@ esp_err_t tool_display_execute(const char *input_json, char *output, size_t outp
     cJSON_Delete(root);
 
     ESP_LOGI(TAG, "Displaying text: %s", text_copy);
-
-    /* Lazy init LVGL port if not done yet */
-    if (!s_lvgl_ready) {
-        esp_err_t lvgl_ret = hal_lvgl_init();
-        if (lvgl_ret != ESP_OK) {
-            snprintf(output, output_size, "Error: LVGL init failed (%s)", esp_err_to_name(lvgl_ret));
-            return lvgl_ret;
-        }
-        s_lvgl_ready = true;
-    }
 
     /* Acquire LVGL lock */
     if (!lvgl_port_lock(100)) {
