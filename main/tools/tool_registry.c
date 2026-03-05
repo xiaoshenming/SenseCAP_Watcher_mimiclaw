@@ -195,14 +195,36 @@ esp_err_t tool_registry_init(void)
     };
     register_tool(&cam);
 
-    /* Register display_text */
+    /* Register display_text - now supports multiple drawing operations */
     mimi_tool_t disp = {
-        .name = "display_text",
-        .description = "Display text on the device screen.",
+        .name = "display",
+        .description = "Draw on the device screen (412x412 pixels). Supports: text, rect, circle, line, point, clear, fill. "
+                       "Use action='text' with 'text' and optional x,y,color. "
+                       "Use action='rect' with x,y,width,height,color,fill. "
+                       "Use action='circle' with x,y,radius,color,fill. "
+                       "Use action='line' with x,y,x2,y2,color,width. "
+                       "Use action='point' with x,y,color,size. "
+                       "Use action='clear' to clear screen. "
+                       "Use action='fill' with color to fill screen. "
+                       "Colors: black, white, red, green, blue, yellow, cyan, magenta, gray, orange. "
+                       "Coordinates: (0,0) is top-left, (411,411) is bottom-right.",
         .input_schema_json =
             "{\"type\":\"object\","
-            "\"properties\":{\"text\":{\"type\":\"string\",\"description\":\"Text to display\"}},"
-            "\"required\":[\"text\"]}",
+            "\"properties\":{"
+            "\"action\":{\"type\":\"string\",\"description\":\"Operation: text, rect, circle, line, point, clear, fill\"},"
+            "\"text\":{\"type\":\"string\",\"description\":\"Text to display (for text action)\"},"
+            "\"x\":{\"type\":\"integer\",\"description\":\"X position (0-411)\"},"
+            "\"y\":{\"type\":\"integer\",\"description\":\"Y position (0-411)\"},"
+            "\"x2\":{\"type\":\"integer\",\"description\":\"End X for line\"},"
+            "\"y2\":{\"type\":\"integer\",\"description\":\"End Y for line\"},"
+            "\"width\":{\"type\":\"integer\",\"description\":\"Width for rect, or line thickness\"},"
+            "\"height\":{\"type\":\"integer\",\"description\":\"Height for rect\"},"
+            "\"radius\":{\"type\":\"integer\",\"description\":\"Radius for circle\"},"
+            "\"size\":{\"type\":\"integer\",\"description\":\"Size for point\"},"
+            "\"color\":{\"type\":\"string\",\"description\":\"Color name: black, white, red, green, blue, yellow, cyan, magenta, gray, orange\"},"
+            "\"fill\":{\"type\":\"boolean\",\"description\":\"Fill shape (for rect/circle)\"}"
+            "},"
+            "\"required\":[\"action\"]}",
         .execute = tool_display_execute,
     };
     register_tool(&disp);
