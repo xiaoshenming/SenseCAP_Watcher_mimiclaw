@@ -100,6 +100,10 @@ esp_err_t hal_display_fill_area(uint16_t x0, uint16_t y0,
         return ESP_ERR_INVALID_STATE;
     }
 
+    /* SPD2010 requires column alignment to 4N */
+    x0 = (x0 >> 2) << 2;
+    x1 = ((x1 >> 2) << 2) + 3;
+
     esp_err_t ret;
 
     ret = spd2010_set_window(x0, y0, x1, y1);
@@ -126,16 +130,20 @@ esp_err_t hal_display_fill_area(uint16_t x0, uint16_t y0,
 
     /* 分批写入 */
     uint16_t lines_remaining = height;
+    uint16_t total_lines_written = 0;
     while (lines_remaining > 0) {
         uint16_t lines = (lines_remaining > buf_lines) ? buf_lines : lines_remaining;
         size_t pixels = width * lines;
         ret = spd2010_write_pixels(buf, pixels);
         if (ret != ESP_OK) {
+            ESP_LOGE(TAG, "Write failed at line %d, remaining %d", total_lines_written, lines_remaining);
             free(buf);
             return ret;
         }
+        total_lines_written += lines;
         lines_remaining -= lines;
     }
+    ESP_LOGI(TAG, "Fill complete: %dx%d, wrote %d lines", width, height, total_lines_written);
 
     free(buf);
     return ESP_OK;

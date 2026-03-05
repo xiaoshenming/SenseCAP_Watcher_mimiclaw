@@ -1,5 +1,5 @@
 #include "lvgl_port.h"
-#include "hal_display.h"
+#include "spd2010.h"
 #include "../touch/hal_touch.h"
 #include "../hal_config.h"
 #include "esp_lvgl_port.h"
@@ -7,39 +7,66 @@
 
 static const char *TAG = "lvgl_port";
 static bool s_initialized = false;
+static lv_display_t *s_display = NULL;
 
-static void lvgl_flush_cb(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map)
+static void spd2010_area_align_cb(lv_event_t *e)
 {
-    uint16_t w = lv_area_get_width(area);
-    uint16_t h = lv_area_get_height(area);
-    esp_err_t ret = hal_display_draw(area->x1, area->y1, area->x2, area->y2, (uint16_t *)px_map, w * h);
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Display draw failed: %s (area: %d,%d-%d,%d, pixels: %d)",
-                 esp_err_to_name(ret), area->x1, area->y1, area->x2, area->y2, w * h);
-    }
-    lv_display_flush_ready(disp);
+    lv_area_t *area = (lv_area_t *)lv_event_get_param(e);
+    uint16_t x1 = area->x1;
+    uint16_t x2 = area->x2;
+    area->x1 = (x1 >> 2) << 2;
+    area->x2 = ((x2 >> 2) << 2) + 3;
 }
 
 esp_err_t hal_lvgl_init(void)
 {
     if (s_initialized) return ESP_OK;
 
-    const lvgl_port_cfg_t cfg = ESP_LVGL_PORT_INIT_CONFIG();
-    ESP_ERROR_CHECK(lvgl_port_init(&cfg));
+    ESP_LOGI(TAG, "Initialize LVGL library");
+    lv_init();
 
-    /* Create display using LVGL native API */
-    lv_display_t *disp = lv_display_create(LCD_WIDTH, LCD_HEIGHT);
-    lv_display_set_flush_cb(disp, lvgl_flush_cb);
+    ESP_LOGI(TAG, "Initialize LVGL port");
+    const lvgl_port_cfg_t port_cfg = ESP_LVGL_PORT_INIT_CONFIG();
+    ESP_ERROR_CHECK(lvgl_port_init(&port_cfg));
 
-    /* Allocate draw buffers - use smaller buffer to avoid SPI transfer size limit */
-    size_t buf_size = LCD_WIDTH * 10;  /* 10 lines instead of 40 */
-    size_t buf_bytes = buf_size * sizeof(lv_color_t);
-    void *buf1 = heap_caps_malloc(buf_bytes, MALLOC_CAP_SPIRAM);
-    void *buf2 = heap_caps_malloc(buf_bytes, MALLOC_CAP_SPIRAM);
-    lv_display_set_buffers(disp, buf1, buf2, buf_bytes, LV_DISPLAY_RENDER_MODE_PARTIAL);
+    ESP_LOGI(TAG, "Adding LCD display");
+    const lvgl_port_display_cfg_t display_cfg = {
+        .io_handle = spd2010_get_io_handle(),
+        .panel_handle = spd2010_get_panel_handle(),
+        .control_handle = NULL,
+        .buffer_size = LCD_WIDTH * 20,
+        .double_buffer = false,
+        .trans_size = 0,
+        .hres = LCD_WIDTH,
+        .vres = LCD_HEIGHT,
+        .monochrome = false,
+        .rotation = {
+            .swap_xy = false,
+            .mirror_x = false,
+            .mirror_y = false,
+        },
+        .color_format = LV_COLOR_FORMAT_RGB565,
+        .flags = {
+            .buff_dma = 1,
+            .buff_spiram = 0,
+            .sw_rotate = 0,
+            .swap_bytes = 1,
+            .full_refresh = 0,
+            .direct_mode = 0,
+        },
+    };
+
+    s_display = lvgl_port_add_disp(&display_cfg);
+    if (s_display == NULL) {
+        ESP_LOGE(TAG, "Failed to add display");
+        return ESP_FAIL;
+    }
+
+    /* SPD2010 要求列地址必须是4的倍数 */
+    lv_display_add_event_cb(s_display, spd2010_area_align_cb, LV_EVENT_INVALIDATE_AREA, NULL);
 
     s_initialized = true;
-    ESP_LOGI(TAG, "LVGL initialized");
+    ESP_LOGI(TAG, "LVGL initialized successfully");
     return ESP_OK;
 }
 

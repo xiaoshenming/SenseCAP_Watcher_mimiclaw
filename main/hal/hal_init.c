@@ -15,8 +15,16 @@
 #include "driver/spi_common.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "lvgl.h"
 
 static const char *TAG = "hal_init";
+
+static void spd2010_area_align_cb(lv_event_t *e)
+{
+    lv_area_t *area = (lv_area_t *)lv_event_get_param(e);
+    area->x1 = (area->x1 >> 2) << 2;
+    area->x2 = ((area->x2 >> 2) << 2) + 3;
+}
 
 esp_err_t watcher_hal_init(void)
 {
@@ -84,6 +92,9 @@ esp_err_t watcher_hal_init(void)
         return ret;
     }
     ESP_LOGI(TAG, "[3.5/8] LVGL OK");
+
+    /* Register SPD2010 area alignment callback */
+    lv_display_add_event_cb(lv_display_get_default(), spd2010_area_align_cb, LV_EVENT_INVALIDATE_AREA, NULL);
 
     /* 4. Audio */
     ESP_LOGI(TAG, "[4/8] Audio (ES8311 + ES7243E)...");

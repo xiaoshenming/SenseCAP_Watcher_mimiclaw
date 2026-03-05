@@ -51,3 +51,13 @@ esp_err_t spd2010_set_window(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1)
  * @return ESP_OK 成功
  */
 esp_err_t spd2010_write_pixels(const uint16_t *data, size_t pixel_count);
+
+/**
+ * 获取 panel IO handle (用于 LVGL)
+ */
+void* spd2010_get_io_handle(void);
+
+/**
+ * 获取 panel handle (用于 LVGL)
+ */
+void* spd2010_get_panel_handle(void);
