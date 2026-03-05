@@ -24,21 +24,34 @@ esp_err_t spd2010_init(void)
 
     esp_err_t ret;
 
-    /* QSPI bus config */
-    spi_bus_config_t bus_cfg = SPD2010_PANEL_BUS_QSPI_CONFIG(
-        GPIO_QSPI_PCLK, GPIO_QSPI_DATA0, GPIO_QSPI_DATA1,
-        GPIO_QSPI_DATA2, GPIO_QSPI_DATA3, LCD_WIDTH * 40 * 2);
-    bus_cfg.flags = SPICOMMON_BUSFLAG_QUAD;
+    /* QSPI bus config — 按照 xiaozhi-esp32 模板配置 */
+    spi_bus_config_t qspi_cfg = {0};
+    qspi_cfg.sclk_io_num = GPIO_QSPI_PCLK;
+    qspi_cfg.data0_io_num = GPIO_QSPI_DATA0;
+    qspi_cfg.data1_io_num = GPIO_QSPI_DATA1;
+    qspi_cfg.data2_io_num = GPIO_QSPI_DATA2;
+    qspi_cfg.data3_io_num = GPIO_QSPI_DATA3;
+    qspi_cfg.max_transfer_sz = LCD_WIDTH * LCD_HEIGHT * 16 / 8 / 16;
 
-    ret = spi_bus_initialize(SPI3_HOST, &bus_cfg, SPI_DMA_CH_AUTO);
+    ret = spi_bus_initialize(SPI3_HOST, &qspi_cfg, SPI_DMA_CH_AUTO);
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "SPI bus init failed: %s", esp_err_to_name(ret));
         return ret;
     }
 
-    /* Panel IO config */
-    esp_lcd_panel_io_spi_config_t io_cfg = SPD2010_PANEL_IO_QSPI_CONFIG(GPIO_LCD_CS, NULL, NULL);
-    io_cfg.pclk_hz = 40 * 1000 * 1000;
+    /* Panel IO config — 按照 xiaozhi-esp32 模板配置 */
+    const esp_lcd_panel_io_spi_config_t io_cfg = {
+        .cs_gpio_num = GPIO_LCD_CS,
+        .dc_gpio_num = -1,
+        .spi_mode = 3,
+        .pclk_hz = 40 * 1000 * 1000,
+        .trans_queue_depth = 2,
+        .lcd_cmd_bits = 32,
+        .lcd_param_bits = 8,
+        .flags = {
+            .quad_mode = true,
+        },
+    };
 
     ret = esp_lcd_new_panel_io_spi((esp_lcd_spi_bus_handle_t)SPI3_HOST, &io_cfg, &s_io_handle);
     if (ret != ESP_OK) {
@@ -73,9 +86,6 @@ esp_err_t spd2010_init(void)
     if (ret != ESP_OK) goto err_panel;
 
     ret = esp_lcd_panel_init(s_panel_handle);
-    if (ret != ESP_OK) goto err_panel;
-
-    ret = esp_lcd_panel_invert_color(s_panel_handle, true);
     if (ret != ESP_OK) goto err_panel;
 
     ret = esp_lcd_panel_disp_on_off(s_panel_handle, true);
