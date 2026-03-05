@@ -45,6 +45,9 @@ esp_err_t tool_display_execute(const char *input_json, char *output, size_t outp
     /* Create or reuse label on the active screen */
     if (!s_label || !lv_obj_is_valid(s_label)) {
         lv_obj_t *scr = lv_screen_active();
+        /* 设置黑色背景，否则白字在白底上不可见 */
+        lv_obj_set_style_bg_color(scr, lv_color_black(), 0);
+        lv_obj_set_style_bg_opa(scr, LV_OPA_COVER, 0);
         s_label = lv_label_create(scr);
         lv_obj_set_width(s_label, lv_pct(90));
         lv_label_set_long_mode(s_label, LV_LABEL_LONG_WRAP);
