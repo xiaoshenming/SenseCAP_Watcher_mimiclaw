@@ -249,7 +249,14 @@ esp_err_t tool_display_execute(const char *input_json, char *output, size_t outp
         return ESP_FAIL;
     }
 
-    const char *action = jstr(root, "action", "text");
+    /* Sanitize action — glm-4.7 sometimes injects XML-like garbage
+     * e.g. "circle<arg_key><arg_key>align</arg_key>..." → "circle"   */
+    const char *raw_action = jstr(root, "action", "text");
+    char action_buf[16] = {0};
+    for (int i = 0; i < 15 && raw_action[i] && raw_action[i] != '<'
+         && raw_action[i] != ' ' && raw_action[i] != '{'; i++)
+        action_buf[i] = raw_action[i];
+    const char *action = action_buf;
     ESP_LOGI(TAG, "action=%s", action);
 
     if (!lvgl_port_lock(200)) {
