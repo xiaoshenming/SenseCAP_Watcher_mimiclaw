@@ -195,34 +195,48 @@ esp_err_t tool_registry_init(void)
     };
     register_tool(&cam);
 
-    /* Register display_text - now supports multiple drawing operations */
+    /* Register display — full drawing toolkit for the 412×412 circular screen */
     mimi_tool_t disp = {
         .name = "display",
-        .description = "Draw on the device screen (412x412 pixels). Supports: text, rect, circle, line, point, clear, fill. "
-                       "Use action='text' with 'text' and optional x,y,color. "
-                       "Use action='rect' with x,y,width,height,color,fill. "
-                       "Use action='circle' with x,y,radius,color,fill. "
-                       "Use action='line' with x,y,x2,y2,color,width. "
-                       "Use action='point' with x,y,color,size. "
-                       "Use action='clear' to clear screen. "
-                       "Use action='fill' with color to fill screen. "
-                       "Colors: black, white, red, green, blue, yellow, cyan, magenta, gray, orange. "
-                       "Coordinates: (0,0) is top-left, (411,411) is bottom-right.",
+        .description =
+            "Draw on the device's 412x412 pixel CIRCULAR screen. IMPORTANT: the screen is ROUND — edges and corners are clipped! "
+            "Edge-aligned content automatically gets safe margins so it stays visible inside the circle. "
+            "ALWAYS call this tool to show something on screen — never just claim you displayed it. "
+            "Each call ADDS an element; use clear first to reset. "
+            "POSITIONING (choose one): "
+            "1) align='center|top|bottom|left|right|top_left|top_right|bottom_left|bottom_right' — RECOMMENDED, auto-positioned inside safe area. "
+            "2) x,y pixels — absolute position (be careful near edges). "
+            "ACTIONS: "
+            "text — display text (font_size: 14/20/28/36, use max_width for long text wrapping). "
+            "rect — rectangle. circle — circle. line — line. arc — arc segment. "
+            "symbol — built-in icons (ok,close,warning,home,settings,wifi,bluetooth,battery_full,charge,play,pause,stop,bell,mail,"
+            "power,refresh,edit,trash,plus,minus,up,down,left,right,eye_open,eye_close,folder,file,image,audio,video). "
+            "clear — remove all. fill — set background color. "
+            "COLORS: black,white,red,green,blue,yellow,cyan,magenta,gray,orange,pink,purple,brown or '#RRGGBB'.",
         .input_schema_json =
             "{\"type\":\"object\","
             "\"properties\":{"
-            "\"action\":{\"type\":\"string\",\"description\":\"Operation: text, rect, circle, line, point, clear, fill\"},"
-            "\"text\":{\"type\":\"string\",\"description\":\"Text to display (for text action)\"},"
-            "\"x\":{\"type\":\"integer\",\"description\":\"X position (0-411)\"},"
-            "\"y\":{\"type\":\"integer\",\"description\":\"Y position (0-411)\"},"
-            "\"x2\":{\"type\":\"integer\",\"description\":\"End X for line\"},"
-            "\"y2\":{\"type\":\"integer\",\"description\":\"End Y for line\"},"
-            "\"width\":{\"type\":\"integer\",\"description\":\"Width for rect, or line thickness\"},"
-            "\"height\":{\"type\":\"integer\",\"description\":\"Height for rect\"},"
-            "\"radius\":{\"type\":\"integer\",\"description\":\"Radius for circle\"},"
-            "\"size\":{\"type\":\"integer\",\"description\":\"Size for point\"},"
-            "\"color\":{\"type\":\"string\",\"description\":\"Color name: black, white, red, green, blue, yellow, cyan, magenta, gray, orange\"},"
-            "\"fill\":{\"type\":\"boolean\",\"description\":\"Fill shape (for rect/circle)\"}"
+            "\"action\":{\"type\":\"string\",\"description\":\"text|rect|circle|line|arc|symbol|clear|fill\"},"
+            "\"text\":{\"type\":\"string\",\"description\":\"Text content (for text action)\"},"
+            "\"name\":{\"type\":\"string\",\"description\":\"Symbol name (for symbol action)\"},"
+            "\"x\":{\"type\":\"integer\",\"description\":\"X pixel (0-411) or line start X\"},"
+            "\"y\":{\"type\":\"integer\",\"description\":\"Y pixel (0-411) or line start Y\"},"
+            "\"x2\":{\"type\":\"integer\",\"description\":\"Line end X\"},"
+            "\"y2\":{\"type\":\"integer\",\"description\":\"Line end Y\"},"
+            "\"align\":{\"type\":\"string\",\"description\":\"Named position: center,top,bottom,left,right,top_left,top_right,bottom_left,bottom_right\"},"
+            "\"x_offset\":{\"type\":\"integer\",\"description\":\"Pixel offset from align position\"},"
+            "\"y_offset\":{\"type\":\"integer\",\"description\":\"Pixel offset from align position\"},"
+            "\"width\":{\"type\":\"integer\",\"description\":\"Rect width or line thickness\"},"
+            "\"height\":{\"type\":\"integer\",\"description\":\"Rect height\"},"
+            "\"radius\":{\"type\":\"integer\",\"description\":\"Circle/arc radius or rect corner radius\"},"
+            "\"start_angle\":{\"type\":\"integer\",\"description\":\"Arc start angle in degrees\"},"
+            "\"end_angle\":{\"type\":\"integer\",\"description\":\"Arc end angle in degrees\"},"
+            "\"font_size\":{\"type\":\"integer\",\"description\":\"Text size: 14(small), 20(medium), 28(large), 36(huge)\"},"
+            "\"max_width\":{\"type\":\"integer\",\"description\":\"Text wrap width in pixels\"},"
+            "\"color\":{\"type\":\"string\",\"description\":\"Color name or hex #RRGGBB\"},"
+            "\"bg_color\":{\"type\":\"string\",\"description\":\"Text background color\"},"
+            "\"fill\":{\"type\":\"boolean\",\"description\":\"Fill shape (true) or outline only (false)\"},"
+            "\"border_width\":{\"type\":\"integer\",\"description\":\"Outline thickness for unfilled shapes\"}"
             "},"
             "\"required\":[\"action\"]}",
         .execute = tool_display_execute,
