@@ -199,17 +199,19 @@ esp_err_t tool_registry_init(void)
     mimi_tool_t disp = {
         .name = "display",
         .description =
-            "Draw on 412x412 ROUND screen. Center=(206,206). MUST call this tool to draw. "
-            "RULES: 1) Each call ADDS one element to screen. 2) Give each object an 'id'. "
-            "3) Use 'query' to see what's on screen. 4) Use 'update'/'delete' to change existing objects — DO NOT clear+redraw! "
-            "DRAW: text, rect, circle, line, arc, symbol(icon names: ok,close,warning,home,wifi,play,pause,bell,mail,power,edit,plus,minus). "
-            "MODIFY: update(change color/pos/text by id), delete(remove by id), animate(move/fade by id). "
-            "SCENE: query(list all objects), clear(remove ALL), fill(set background). "
-            "POSITION: Use align(center/top/bottom/left/right/top_left/...) OR x,y pixels. "
+            "Draw on 412x412 ROUND screen. Center=(206,206). "
+            "BATCH(preferred): Use 'actions' array to draw MANY elements in ONE call! "
+            "Example: {\"actions\":[{\"action\":\"line\",\"x\":50,\"y\":137,\"x2\":362,\"y2\":137},{\"action\":\"text\",\"text\":\"Hi\",\"x\":100,\"y\":50}]} "
+            "Single mode: pass 'action' string for one element. "
+            "RULES: Give each object an 'id'. Use 'query' first. Use 'update'/'delete' — DO NOT clear+redraw! "
+            "ACTIONS: text, rect, circle, line, arc, symbol(ok,close,warning,home,wifi,play,pause,bell,power,edit,plus,minus), update, delete, animate. "
+            "SCENE: query(list all), clear(remove ALL), fill(bg color). "
+            "POSITION: align(center/top/bottom/left/right/top_left/...) OR x,y pixels. "
             "COLORS: black,white,red,green,blue,yellow,cyan,magenta,gray,orange,pink,purple,brown,#RRGGBB.",
         .input_schema_json =
             "{\"type\":\"object\","
             "\"properties\":{"
+            "\"actions\":{\"type\":\"array\",\"items\":{\"type\":\"object\"},\"description\":\"Batch: array of action objects, each with action/id/params\"},"
             "\"action\":{\"type\":\"string\",\"enum\":[\"query\",\"text\",\"rect\",\"circle\",\"line\",\"arc\",\"symbol\",\"update\",\"delete\",\"animate\",\"clear\",\"fill\"]},"
             "\"id\":{\"type\":\"string\",\"description\":\"Object ID. Set when creating; required for update/delete/animate\"},"
             "\"text\":{\"type\":\"string\"},"

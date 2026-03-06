@@ -238,19 +238,10 @@ static void anim_set_opa(void *obj, int32_t v)  { lv_obj_set_style_opa(obj, v, 0
 static void anim_set_w(void *obj, int32_t v)    { lv_obj_set_width(obj, v); }
 static void anim_set_h(void *obj, int32_t v)    { lv_obj_set_height(obj, v); }
 
-/* ══════════════════════════════════════════════════
- *  Main execute — each call adds an element to screen
- * ══════════════════════════════════════════════════ */
-esp_err_t tool_display_execute(const char *input_json, char *output, size_t output_size)
+/* Execute a single action. LVGL must already be locked by caller. */
+static void exec_action(cJSON *root, lv_obj_t *scr, char *output, size_t output_size)
 {
-    cJSON *root = cJSON_Parse(input_json ? input_json : "{}");
-    if (!root) {
-        snprintf(output, output_size, "Error: invalid JSON");
-        return ESP_FAIL;
-    }
-
-    /* Sanitize action — glm-4.7 sometimes injects XML-like garbage
-     * e.g. "circle<arg_key><arg_key>align</arg_key>..." → "circle"   */
+    /* Sanitize action — glm-4.7 sometimes injects XML-like garbage */
     const char *raw_action = jstr(root, "action", "text");
     char action_buf[16] = {0};
     for (int i = 0; i < 15 && raw_action[i] && raw_action[i] != '<'
@@ -258,14 +249,6 @@ esp_err_t tool_display_execute(const char *input_json, char *output, size_t outp
         action_buf[i] = raw_action[i];
     const char *action = action_buf;
     ESP_LOGI(TAG, "action=%s", action);
-
-    if (!lvgl_port_lock(200)) {
-        cJSON_Delete(root);
-        snprintf(output, output_size, "Error: LVGL lock timeout");
-        return ESP_FAIL;
-    }
-
-    lv_obj_t *scr = lv_screen_active();
 
     const char *oid = jstr(root, "id", NULL);
 
@@ -581,6 +564,45 @@ esp_err_t tool_display_execute(const char *input_json, char *output, size_t outp
     } else {
         snprintf(output, output_size, "Unknown action '%s'. Use: text, rect, circle, "
                  "line, arc, symbol, clear, fill, query, delete, update, animate", action);
+    }
+}
+
+/* ══════════════════════════════════════════════════
+ *  Main execute — single action or batch via "actions" array
+ * ══════════════════════════════════════════════════ */
+esp_err_t tool_display_execute(const char *input_json, char *output, size_t output_size)
+{
+    cJSON *root = cJSON_Parse(input_json ? input_json : "{}");
+    if (!root) {
+        snprintf(output, output_size, "Error: invalid JSON");
+        return ESP_FAIL;
+    }
+
+    if (!lvgl_port_lock(200)) {
+        cJSON_Delete(root);
+        snprintf(output, output_size, "Error: LVGL lock timeout");
+        return ESP_FAIL;
+    }
+
+    lv_obj_t *scr = lv_screen_active();
+
+    cJSON *actions = cJSON_GetObjectItem(root, "actions");
+    if (actions && cJSON_IsArray(actions)) {
+        /* Batch mode: execute array of actions in one call */
+        int n = cJSON_GetArraySize(actions);
+        if (n > MAX_DISP_OBJS) n = MAX_DISP_OBJS;
+        int pos = 0;
+        char buf[256];
+        for (int i = 0; i < n; i++) {
+            exec_action(cJSON_GetArrayItem(actions, i), scr, buf, sizeof(buf));
+            if (i > 0 && pos < (int)output_size - 4)
+                pos += snprintf(output + pos, output_size - pos, " | ");
+            pos += snprintf(output + pos, output_size - pos, "%s", buf);
+        }
+        if (pos == 0) snprintf(output, output_size, "No actions in array");
+    } else {
+        /* Single action mode (backward compatible) */
+        exec_action(root, scr, output, output_size);
     }
 
     lv_refr_now(lv_display_get_default());
