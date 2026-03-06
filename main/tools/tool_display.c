@@ -10,23 +10,61 @@
 
 static const char *TAG = "tool_display";
 
-/* ── Object tracking (accumulative drawing, cleared on 'clear') ── */
-#define MAX_DISP_OBJS 32
-static lv_obj_t *s_objs[MAX_DISP_OBJS];
-static int s_obj_count = 0;
+/* ── Object tracking with IDs (incremental scene management) ── */
+typedef struct {
+    char id[20];       /* User-provided or auto "obj_N" */
+    char type[10];     /* text/rect/circle/line/arc/symbol */
+    char desc[80];     /* Human-readable summary for LLM query */
+    lv_obj_t *obj;
+} disp_obj_t;
 
-static void track_obj(lv_obj_t *obj) {
-    if (s_obj_count < MAX_DISP_OBJS)
-        s_objs[s_obj_count++] = obj;
+#define MAX_DISP_OBJS 32
+static disp_obj_t s_objs[MAX_DISP_OBJS];
+static int s_obj_count = 0;
+static int s_id_counter = 0;
+static char s_bg_color[16] = "black";
+
+static int track_obj(lv_obj_t *obj, const char *id, const char *type, const char *desc) {
+    if (s_obj_count >= MAX_DISP_OBJS) return -1;
+    disp_obj_t *d = &s_objs[s_obj_count];
+    if (id && id[0])
+        snprintf(d->id, sizeof(d->id), "%s", id);
+    else
+        snprintf(d->id, sizeof(d->id), "obj_%d", ++s_id_counter);
+    snprintf(d->type, sizeof(d->type), "%s", type ? type : "?");
+    snprintf(d->desc, sizeof(d->desc), "%s", desc ? desc : "");
+    d->obj = obj;
+    return s_obj_count++;
+}
+
+static disp_obj_t *find_by_id(const char *id) {
+    if (!id) return NULL;
+    for (int i = 0; i < s_obj_count; i++)
+        if (strcmp(s_objs[i].id, id) == 0) return &s_objs[i];
+    return NULL;
+}
+
+static bool remove_by_id(const char *id) {
+    for (int i = 0; i < s_obj_count; i++) {
+        if (strcmp(s_objs[i].id, id) == 0) {
+            if (s_objs[i].obj && lv_obj_is_valid(s_objs[i].obj))
+                lv_obj_delete(s_objs[i].obj);
+            for (int j = i; j < s_obj_count - 1; j++)
+                s_objs[j] = s_objs[j + 1];
+            s_obj_count--;
+            return true;
+        }
+    }
+    return false;
 }
 
 static void clear_all(void) {
     for (int i = 0; i < s_obj_count; i++) {
-        if (s_objs[i] && lv_obj_is_valid(s_objs[i]))
-            lv_obj_delete(s_objs[i]);
-        s_objs[i] = NULL;
+        if (s_objs[i].obj && lv_obj_is_valid(s_objs[i].obj))
+            lv_obj_delete(s_objs[i].obj);
     }
     s_obj_count = 0;
+    s_id_counter = 0;
 }
 
 /* ── JSON helpers ── */
@@ -103,14 +141,25 @@ static lv_align_t parse_align(const char *a) {
 #define EDGE_MARGIN  40
 #define CORNER_MARGIN 65
 
-/* ── Position helper: x,y for absolute, align for named, default=center ── */
-static void pos_obj(lv_obj_t *obj, cJSON *root) {
+/* ── Position helper ──
+ * center_offset: if true, x,y means the CENTER of the object (for shapes).
+ *                The object's LVGL size must already be set before calling.
+ *                Automatically adjusts so LVGL's top-left origin matches.
+ */
+static void pos_obj(lv_obj_t *obj, cJSON *root, bool center_offset) {
     cJSON *xi = cJSON_GetObjectItem(root, "x");
     cJSON *yi = cJSON_GetObjectItem(root, "y");
     const char *align = jstr(root, "align", NULL);
 
     if (xi && yi && cJSON_IsNumber(xi) && cJSON_IsNumber(yi)) {
-        lv_obj_set_pos(obj, xi->valueint, yi->valueint);
+        int px = xi->valueint;
+        int py = yi->valueint;
+        if (center_offset) {
+            /* x,y = center of shape → offset by half size for LVGL top-left */
+            px -= lv_obj_get_width(obj) / 2;
+            py -= lv_obj_get_height(obj) / 2;
+        }
+        lv_obj_set_pos(obj, px, py);
     } else if (align) {
         int xo = jint(root, "x_offset", 0);
         int yo = jint(root, "y_offset", 0);
@@ -182,6 +231,13 @@ static void line_delete_cb(lv_event_t *e) {
     free(pts);
 }
 
+/* ── Animation callback wrappers ── */
+static void anim_set_x(void *obj, int32_t v)   { lv_obj_set_x(obj, v); }
+static void anim_set_y(void *obj, int32_t v)   { lv_obj_set_y(obj, v); }
+static void anim_set_opa(void *obj, int32_t v)  { lv_obj_set_style_opa(obj, v, 0); }
+static void anim_set_w(void *obj, int32_t v)    { lv_obj_set_width(obj, v); }
+static void anim_set_h(void *obj, int32_t v)    { lv_obj_set_height(obj, v); }
+
 /* ══════════════════════════════════════════════════
  *  Main execute — each call adds an element to screen
  * ══════════════════════════════════════════════════ */
@@ -204,18 +260,23 @@ esp_err_t tool_display_execute(const char *input_json, char *output, size_t outp
 
     lv_obj_t *scr = lv_screen_active();
 
+    const char *oid = jstr(root, "id", NULL);
+
     /* ── clear ── */
     if (strcmp(action, "clear") == 0) {
         clear_all();
         lv_obj_set_style_bg_color(scr, lv_color_black(), 0);
         lv_obj_set_style_bg_opa(scr, LV_OPA_COVER, 0);
-        snprintf(output, output_size, "Screen cleared, all elements removed");
+        snprintf(s_bg_color, sizeof(s_bg_color), "black");
+        snprintf(output, output_size, "Screen cleared, 0 objects");
 
     /* ── fill ── */
     } else if (strcmp(action, "fill") == 0) {
-        lv_obj_set_style_bg_color(scr, parse_color(jstr(root, "color", "black")), 0);
+        const char *fc = jstr(root, "color", "black");
+        lv_obj_set_style_bg_color(scr, parse_color(fc), 0);
         lv_obj_set_style_bg_opa(scr, LV_OPA_COVER, 0);
-        snprintf(output, output_size, "Screen background set");
+        snprintf(s_bg_color, sizeof(s_bg_color), "%.15s", fc);
+        snprintf(output, output_size, "Background=%s, %d objects", fc, s_obj_count);
 
     /* ── text ── */
     } else if (strcmp(action, "text") == 0) {
@@ -242,9 +303,14 @@ esp_err_t tool_display_execute(const char *input_json, char *output, size_t outp
                 lv_obj_set_style_pad_all(lbl, 4, 0);
             }
             lv_label_set_text(lbl, text);
-            pos_obj(lbl, root);
-            track_obj(lbl);
-            snprintf(output, output_size, "Text displayed (%d objs on screen)", s_obj_count);
+            pos_obj(lbl, root, false);
+            char desc[80];
+            snprintf(desc, sizeof(desc), "'%.30s' %s font=%d",
+                     text, jstr(root, "color", "white"), jint(root, "font_size", 14));
+            track_obj(lbl, oid, "text", desc);
+            snprintf(output, output_size, "[%s] text at(%d,%d), %d objs",
+                     s_objs[s_obj_count-1].id,
+                     (int)lv_obj_get_x(lbl), (int)lv_obj_get_y(lbl), s_obj_count);
         }
 
     /* ── rect ── */
@@ -262,9 +328,14 @@ esp_err_t tool_display_execute(const char *input_json, char *output, size_t outp
             lv_obj_set_style_border_color(obj, parse_color(jstr(root, "color", "white")), 0);
             lv_obj_set_style_border_width(obj, jint(root, "border_width", 2), 0);
         }
-        pos_obj(obj, root);
-        track_obj(obj);
-        snprintf(output, output_size, "Rect %dx%d drawn", w, h);
+        pos_obj(obj, root, true);
+        int cx = lv_obj_get_x(obj) + w/2, cy = lv_obj_get_y(obj) + h/2;
+        char desc[80];
+        snprintf(desc, sizeof(desc), "%dx%d center(%d,%d) %s%s", w, h, cx, cy,
+                 jstr(root, "color", "white"), jbool(root, "fill", true) ? "" : " outline");
+        track_obj(obj, oid, "rect", desc);
+        snprintf(output, output_size, "[%s] rect %dx%d center(%d,%d), %d objs",
+                 s_objs[s_obj_count-1].id, w, h, cx, cy, s_obj_count);
 
     /* ── circle ── */
     } else if (strcmp(action, "circle") == 0) {
@@ -281,9 +352,14 @@ esp_err_t tool_display_execute(const char *input_json, char *output, size_t outp
             lv_obj_set_style_border_color(obj, parse_color(jstr(root, "color", "white")), 0);
             lv_obj_set_style_border_width(obj, jint(root, "border_width", 2), 0);
         }
-        pos_obj(obj, root);
-        track_obj(obj);
-        snprintf(output, output_size, "Circle r=%d drawn", r);
+        pos_obj(obj, root, true);
+        int cx = lv_obj_get_x(obj) + r, cy = lv_obj_get_y(obj) + r;
+        char desc[80];
+        snprintf(desc, sizeof(desc), "r=%d center(%d,%d) %s%s", r, cx, cy,
+                 jstr(root, "color", "white"), jbool(root, "fill", true) ? "" : " outline");
+        track_obj(obj, oid, "circle", desc);
+        snprintf(output, output_size, "[%s] circle r=%d center(%d,%d), %d objs",
+                 s_objs[s_obj_count-1].id, r, cx, cy, s_obj_count);
 
     /* ── line ── */
     } else if (strcmp(action, "line") == 0) {
@@ -299,9 +375,14 @@ esp_err_t tool_display_execute(const char *input_json, char *output, size_t outp
             lv_obj_set_style_line_width(ln, jint(root, "width", 2), 0);
             lv_obj_set_user_data(ln, pts);
             lv_obj_add_event_cb(ln, line_delete_cb, LV_EVENT_DELETE, NULL);
-            track_obj(ln);
-            snprintf(output, output_size, "Line (%d,%d)->(%d,%d) drawn",
-                     (int)pts[0].x, (int)pts[0].y, (int)pts[1].x, (int)pts[1].y);
+            char desc[80];
+            snprintf(desc, sizeof(desc), "(%d,%d)->(%d,%d) %s w=%d",
+                     (int)pts[0].x, (int)pts[0].y, (int)pts[1].x, (int)pts[1].y,
+                     jstr(root, "color", "white"), jint(root, "width", 2));
+            track_obj(ln, oid, "line", desc);
+            snprintf(output, output_size, "[%s] line (%d,%d)->(%d,%d), %d objs",
+                     s_objs[s_obj_count-1].id,
+                     (int)pts[0].x, (int)pts[0].y, (int)pts[1].x, (int)pts[1].y, s_obj_count);
         }
 
     /* ── arc ── */
@@ -316,9 +397,14 @@ esp_err_t tool_display_execute(const char *input_json, char *output, size_t outp
         lv_obj_set_style_arc_color(arc, parse_color(jstr(root, "color", "white")), LV_PART_INDICATOR);
         lv_obj_set_style_arc_width(arc, jint(root, "width", 3), LV_PART_INDICATOR);
         lv_obj_set_style_arc_opa(arc, LV_OPA_TRANSP, LV_PART_MAIN);
-        pos_obj(arc, root);
-        track_obj(arc);
-        snprintf(output, output_size, "Arc %d-%d deg r=%d drawn", sa, ea, r);
+        pos_obj(arc, root, true);
+        int cx = lv_obj_get_x(arc) + r, cy = lv_obj_get_y(arc) + r;
+        char desc[80];
+        snprintf(desc, sizeof(desc), "%d-%ddeg r=%d center(%d,%d) %s", sa, ea, r, cx, cy,
+                 jstr(root, "color", "white"));
+        track_obj(arc, oid, "arc", desc);
+        snprintf(output, output_size, "[%s] arc %d-%ddeg r=%d center(%d,%d), %d objs",
+                 s_objs[s_obj_count-1].id, sa, ea, r, cx, cy, s_obj_count);
 
     /* ── symbol (built-in icons) ── */
     } else if (strcmp(action, "symbol") == 0) {
@@ -336,15 +422,158 @@ esp_err_t tool_display_execute(const char *input_json, char *output, size_t outp
             lv_obj_set_style_text_color(lbl, parse_color(jstr(root, "color", "white")), 0);
             lv_obj_set_style_text_font(lbl, pick_font(jint(root, "font_size", 28)), 0);
             lv_label_set_text(lbl, sym);
-            pos_obj(lbl, root);
-            track_obj(lbl);
-            snprintf(output, output_size, "Symbol '%s' displayed", name);
+            pos_obj(lbl, root, false);
+            char desc[80];
+            snprintf(desc, sizeof(desc), "%s %s font=%d", name,
+                     jstr(root, "color", "white"), jint(root, "font_size", 28));
+            track_obj(lbl, oid, "symbol", desc);
+            snprintf(output, output_size, "[%s] symbol '%s', %d objs",
+                     s_objs[s_obj_count-1].id, name, s_obj_count);
+        }
+
+    /* ── query — report current scene state to LLM ── */
+    } else if (strcmp(action, "query") == 0) {
+        int pos = 0;
+        pos += snprintf(output + pos, output_size - pos,
+            "Screen 412x412 circle, bg=%s, %d objects:\n", s_bg_color, s_obj_count);
+        for (int i = 0; i < s_obj_count && pos < (int)output_size - 100; i++) {
+            pos += snprintf(output + pos, output_size - pos,
+                "[%s] %s: %s\n", s_objs[i].id, s_objs[i].type, s_objs[i].desc);
+        }
+
+    /* ── delete — remove a specific object by id ── */
+    } else if (strcmp(action, "delete") == 0) {
+        if (!oid || !oid[0]) {
+            snprintf(output, output_size, "Error: 'id' required for delete");
+        } else if (remove_by_id(oid)) {
+            snprintf(output, output_size, "Deleted '%s', %d objects remain", oid, s_obj_count);
+        } else {
+            snprintf(output, output_size, "Error: id '%s' not found", oid);
+        }
+
+    /* ── update — modify an existing object by id ── */
+    } else if (strcmp(action, "update") == 0) {
+        if (!oid || !oid[0]) {
+            snprintf(output, output_size, "Error: 'id' required for update");
+        } else {
+            disp_obj_t *d = find_by_id(oid);
+            if (!d || !d->obj || !lv_obj_is_valid(d->obj)) {
+                snprintf(output, output_size, "Error: id '%s' not found", oid);
+            } else {
+                /* Update text content */
+                const char *new_text = jstr(root, "text", NULL);
+                if (new_text && (strcmp(d->type, "text") == 0 || strcmp(d->type, "symbol") == 0))
+                    lv_label_set_text(d->obj, new_text);
+                /* Update color */
+                const char *nc = jstr(root, "color", NULL);
+                if (nc) {
+                    lv_color_t c = parse_color(nc);
+                    if (strcmp(d->type, "text") == 0 || strcmp(d->type, "symbol") == 0)
+                        lv_obj_set_style_text_color(d->obj, c, 0);
+                    else if (strcmp(d->type, "arc") == 0)
+                        lv_obj_set_style_arc_color(d->obj, c, LV_PART_INDICATOR);
+                    else if (strcmp(d->type, "line") == 0)
+                        lv_obj_set_style_line_color(d->obj, c, 0);
+                    else
+                        lv_obj_set_style_bg_color(d->obj, c, 0);
+                }
+                /* Update position */
+                cJSON *xi = cJSON_GetObjectItem(root, "x");
+                cJSON *yi = cJSON_GetObjectItem(root, "y");
+                if (xi && yi && cJSON_IsNumber(xi) && cJSON_IsNumber(yi)) {
+                    bool is_shape = strcmp(d->type, "rect") == 0
+                                 || strcmp(d->type, "circle") == 0
+                                 || strcmp(d->type, "arc") == 0;
+                    int px = xi->valueint, py = yi->valueint;
+                    if (is_shape) {
+                        px -= lv_obj_get_width(d->obj) / 2;
+                        py -= lv_obj_get_height(d->obj) / 2;
+                    }
+                    lv_obj_set_pos(d->obj, px, py);
+                }
+                /* Update opacity (0=invisible, 255=opaque) */
+                int opa = jint(root, "opacity", -1);
+                if (opa >= 0)
+                    lv_obj_set_style_opa(d->obj, opa > 255 ? 255 : opa, 0);
+                /* Update size */
+                int nw = jint(root, "width", -1);
+                int nh = jint(root, "height", -1);
+                if (nw > 0) lv_obj_set_width(d->obj, nw);
+                if (nh > 0) lv_obj_set_height(d->obj, nh);
+                snprintf(output, output_size, "Updated '%s' (%s)", oid, d->type);
+            }
+        }
+
+    /* ── animate — animate a property of an existing object ── */
+    } else if (strcmp(action, "animate") == 0) {
+        if (!oid || !oid[0]) {
+            snprintf(output, output_size, "Error: 'id' required for animate");
+        } else {
+            disp_obj_t *d = find_by_id(oid);
+            if (!d || !d->obj || !lv_obj_is_valid(d->obj)) {
+                snprintf(output, output_size, "Error: id '%s' not found", oid);
+            } else {
+                const char *prop = jstr(root, "property", "x");
+                int from_val = jint(root, "from", 0);
+                int to_val = jint(root, "to", 100);
+                int dur = jint(root, "duration", 500);
+                int delay_ms = jint(root, "delay", 0);
+                int repeat = jint(root, "repeat", 0);
+                bool playback = jbool(root, "playback", false);
+                const char *path = jstr(root, "path", "ease_in_out");
+
+                lv_anim_t a;
+                lv_anim_init(&a);
+                lv_anim_set_var(&a, d->obj);
+                lv_anim_set_values(&a, from_val, to_val);
+                lv_anim_set_duration(&a, dur);
+                if (delay_ms > 0) lv_anim_set_delay(&a, delay_ms);
+
+                /* Select property */
+                if (strcmp(prop, "y") == 0)
+                    lv_anim_set_exec_cb(&a, (lv_anim_exec_xcb_t)anim_set_y);
+                else if (strcmp(prop, "opacity") == 0)
+                    lv_anim_set_exec_cb(&a, (lv_anim_exec_xcb_t)anim_set_opa);
+                else if (strcmp(prop, "width") == 0)
+                    lv_anim_set_exec_cb(&a, (lv_anim_exec_xcb_t)anim_set_w);
+                else if (strcmp(prop, "height") == 0)
+                    lv_anim_set_exec_cb(&a, (lv_anim_exec_xcb_t)anim_set_h);
+                else
+                    lv_anim_set_exec_cb(&a, (lv_anim_exec_xcb_t)anim_set_x);
+
+                /* Select easing path */
+                if (strcmp(path, "linear") == 0)
+                    lv_anim_set_path_cb(&a, lv_anim_path_linear);
+                else if (strcmp(path, "ease_in") == 0)
+                    lv_anim_set_path_cb(&a, lv_anim_path_ease_in);
+                else if (strcmp(path, "ease_out") == 0)
+                    lv_anim_set_path_cb(&a, lv_anim_path_ease_out);
+                else if (strcmp(path, "bounce") == 0)
+                    lv_anim_set_path_cb(&a, lv_anim_path_bounce);
+                else if (strcmp(path, "overshoot") == 0)
+                    lv_anim_set_path_cb(&a, lv_anim_path_overshoot);
+                else
+                    lv_anim_set_path_cb(&a, lv_anim_path_ease_in_out);
+
+                /* Repeat & playback */
+                if (repeat < 0)
+                    lv_anim_set_repeat_count(&a, LV_ANIM_REPEAT_INFINITE);
+                else if (repeat > 0)
+                    lv_anim_set_repeat_count(&a, repeat);
+                if (playback)
+                    lv_anim_set_playback_duration(&a, dur);
+
+                lv_anim_start(&a);
+                snprintf(output, output_size, "Animating '%s' %s %d->%d in %dms%s",
+                         oid, prop, from_val, to_val, dur,
+                         repeat < 0 ? " (infinite)" : playback ? " (pingpong)" : "");
+            }
         }
 
     /* ── unknown ── */
     } else {
         snprintf(output, output_size, "Unknown action '%s'. Use: text, rect, circle, "
-                 "line, arc, symbol, clear, fill", action);
+                 "line, arc, symbol, clear, fill, query, delete, update, animate", action);
     }
 
     lv_refr_now(lv_display_get_default());
