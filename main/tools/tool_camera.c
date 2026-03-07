@@ -1,6 +1,6 @@
 #include "tool_camera.h"
 #include "hal/camera/hal_camera.h"
-#include "telegram/telegram_bot.h"
+#include "channels/telegram/telegram_bot.h"
 #include "cJSON.h"
 #include <string.h>
 #include "esp_log.h"
