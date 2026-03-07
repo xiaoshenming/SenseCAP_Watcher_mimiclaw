@@ -25,6 +25,7 @@
 #include "heartbeat/heartbeat.h"
 #include "skills/skill_loader.h"
 #include "hal/hal_init.h"
+#include "ui/robot_face.h"
 
 static const char *TAG = "mimi";
 
@@ -114,6 +115,11 @@ void app_main(void)
     if (hal_err != ESP_OK) {
         ESP_LOGW(TAG, "HAL init incomplete: %s (software services will continue)",
                  esp_err_to_name(hal_err));
+    }
+
+    /* Start cute robot face animation after display is ready */
+    if (hal_err == ESP_OK) {
+        robot_face_start();
     }
 
     /* Phase 1: Core infrastructure */

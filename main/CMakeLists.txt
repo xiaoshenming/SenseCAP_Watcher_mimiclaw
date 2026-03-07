@@ -42,6 +42,7 @@ idf_component_register(
         "hal/camera/sscma_client.c"
         "hal/camera/hal_camera.c"
         "hal/hal_init.c"
+        "ui/robot_face.c"
     INCLUDE_DIRS
         "."
     REQUIRES

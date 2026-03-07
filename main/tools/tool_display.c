@@ -1,6 +1,7 @@
 #include "tool_display.h"
 #include "hal/display/lvgl_port.h"
 #include "hal/hal_config.h"
+#include "ui/robot_face.h"
 #include "cJSON.h"
 #include <string.h>
 #include <stdlib.h>
@@ -576,6 +577,11 @@ esp_err_t tool_display_execute(const char *input_json, char *output, size_t outp
     if (!root) {
         snprintf(output, output_size, "Error: invalid JSON");
         return ESP_FAIL;
+    }
+
+    /* Auto-stop robot face when display tool is used */
+    if (robot_face_is_active()) {
+        robot_face_stop();
     }
 
     if (!lvgl_port_lock(200)) {
