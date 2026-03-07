@@ -12,7 +12,8 @@
 #include "mimi_config.h"
 #include "bus/message_bus.h"
 #include "wifi/wifi_manager.h"
-#include "telegram/telegram_bot.h"
+#include "channels/telegram/telegram_bot.h"
+#include "channels/feishu/feishu_bot.h"
 #include "llm/llm_proxy.h"
 #include "agent/agent_loop.h"
 #include "memory/memory_store.h"
@@ -80,6 +81,13 @@ static void outbound_dispatch_task(void *arg)
             } else {
                 ESP_LOGI(TAG, "Telegram send success for %s (%d bytes)", msg.chat_id, (int)strlen(msg.content));
             }
+        } else if (strcmp(msg.channel, MIMI_CHAN_FEISHU) == 0) {
+            esp_err_t send_err = feishu_send_message(msg.chat_id, msg.content);
+            if (send_err != ESP_OK) {
+                ESP_LOGE(TAG, "Feishu send failed for %s: %s", msg.chat_id, esp_err_to_name(send_err));
+            } else {
+                ESP_LOGI(TAG, "Feishu send success for %s (%d bytes)", msg.chat_id, (int)strlen(msg.content));
+            }
         } else if (strcmp(msg.channel, MIMI_CHAN_WEBSOCKET) == 0) {
             esp_err_t ws_err = ws_server_send(msg.chat_id, msg.content);
             if (ws_err != ESP_OK) {
@@ -135,6 +143,7 @@ void app_main(void)
     ESP_ERROR_CHECK(wifi_manager_init());
     ESP_ERROR_CHECK(http_proxy_init());
     ESP_ERROR_CHECK(telegram_bot_init());
+    ESP_ERROR_CHECK(feishu_bot_init());
     ESP_ERROR_CHECK(llm_proxy_init());
     ESP_ERROR_CHECK(tool_registry_init());
     ESP_ERROR_CHECK(cron_service_init());
@@ -163,6 +172,7 @@ void app_main(void)
             /* Start network-dependent services */
             ESP_ERROR_CHECK(agent_loop_start());
             ESP_ERROR_CHECK(telegram_bot_start());
+            ESP_ERROR_CHECK(feishu_bot_start());
             cron_service_start();
             heartbeat_start();
             ESP_ERROR_CHECK(ws_server_start());

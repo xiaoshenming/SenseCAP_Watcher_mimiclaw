@@ -10,3 +10,4 @@ dependencies:
     version: 1.0.2
     rules:
     - if: target in [esp32s3]
+  espressif/esp_websocket_client: ^1.4.0
