@@ -7,6 +7,7 @@
 #include "tools/tool_camera.h"
 #include "tools/tool_display.h"
 #include "tools/tool_sysinfo.h"
+#include "tools/tool_face.h"
 
 #include <string.h>
 #include "esp_log.h"
@@ -14,7 +15,7 @@
 
 static const char *TAG = "tools";
 
-#define MAX_TOOLS 12
+#define MAX_TOOLS 16
 
 static mimi_tool_t s_tools[MAX_TOOLS];
 static int s_tool_count = 0;
@@ -199,12 +200,15 @@ esp_err_t tool_registry_init(void)
     mimi_tool_t disp = {
         .name = "display",
         .description =
-            "Draw on 412x412 ROUND screen. Center=(206,206). "
+            "Draw on 412x412 ROUND screen. Center=(206,206). SUPPORTS CHINESE TEXT AND EMOJI ICONS. "
             "BATCH(preferred): Use 'actions' array to draw MANY elements in ONE call! "
-            "Example: {\"actions\":[{\"action\":\"line\",\"x\":50,\"y\":137,\"x2\":362,\"y2\":137},{\"action\":\"text\",\"text\":\"Hi\",\"x\":100,\"y\":50}]} "
+            "Example: {\"actions\":[{\"action\":\"text\",\"text\":\"你好世界\",\"align\":\"center\",\"font_size\":30,\"color\":\"white\"},{\"action\":\"symbol\",\"name\":\"happy\",\"align\":\"bottom\",\"color\":\"yellow\"}]} "
             "Single mode: pass 'action' string for one element. "
             "RULES: Give each object an 'id'. Use 'query' first. Use 'update'/'delete' — DO NOT clear+redraw! "
-            "ACTIONS: text, rect, circle, line, arc, symbol(ok,close,warning,home,wifi,play,pause,bell,power,edit,plus,minus), update, delete, animate. "
+            "ACTIONS: text(supports Chinese!), rect, circle, line, arc, "
+            "symbol(LVGL:ok,close,warning,home,wifi,play,pause,bell,power,edit,plus,minus | "
+            "Emoji:happy,laughing,sad,angry,crying,loving,surprised,thinking,winking,cool,heart,star,music,sun,moon,cloud,check,xmark), "
+            "update, delete, animate. "
             "SCENE: query(list all), clear(remove ALL), fill(bg color). "
             "POSITION: align(center/top/bottom/left/right/top_left/...) OR x,y pixels. "
             "COLORS: black,white,red,green,blue,yellow,cyan,magenta,gray,orange,pink,purple,brown,#RRGGBB.",
@@ -224,7 +228,7 @@ esp_err_t tool_registry_init(void)
             "\"width\":{\"type\":\"integer\"},\"height\":{\"type\":\"integer\"},"
             "\"radius\":{\"type\":\"integer\"},"
             "\"start_angle\":{\"type\":\"integer\"},\"end_angle\":{\"type\":\"integer\"},"
-            "\"font_size\":{\"type\":\"integer\",\"description\":\"14/20/28/36\"},"
+            "\"font_size\":{\"type\":\"integer\",\"description\":\"14/20/30, supports Chinese\"},"
             "\"max_width\":{\"type\":\"integer\"},"
             "\"color\":{\"type\":\"string\"},\"bg_color\":{\"type\":\"string\"},"
             "\"fill\":{\"type\":\"boolean\",\"description\":\"true=filled,false=outline\"},"
@@ -254,6 +258,29 @@ esp_err_t tool_registry_init(void)
         .execute = tool_sysinfo_execute,
     };
     register_tool(&sysinfo);
+
+    /* Register face emotion tool */
+    mimi_tool_t face = {
+        .name = "face",
+        .description =
+            "Control the robot face emotions on screen. "
+            "Available emotions: neutral (default calm), happy (joyful squint), sad (droopy), "
+            "angry (intense), surprised (wide eyes O-mouth), love (heart-eyed), "
+            "sleepy (half-closed), wink (left open right closed), thinking (eyes up-left), "
+            "excited (big pupils wide mouth), scared (wide eyes tiny pupils), "
+            "cool (sunglasses squint), cry (tearful), dizzy (cross-eyed), "
+            "shy (blushing), smug (one-eye squint smirk). "
+            "Use action=list to get full list, action=status to check current state.",
+        .input_schema_json =
+            "{\"type\":\"object\","
+            "\"properties\":{"
+            "\"action\":{\"type\":\"string\",\"enum\":[\"set\",\"list\",\"status\"],\"description\":\"set(default)=change emotion, list=show all, status=current state\"},"
+            "\"emotion\":{\"type\":\"string\",\"description\":\"Emotion name (required for set)\"}"
+            "},"
+            "\"required\":[]}",
+        .execute = tool_face_execute,
+    };
+    register_tool(&face);
 
     build_tools_json();
 

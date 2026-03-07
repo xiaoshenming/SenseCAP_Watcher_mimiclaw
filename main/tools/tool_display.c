@@ -2,6 +2,7 @@
 #include "hal/display/lvgl_port.h"
 #include "hal/hal_config.h"
 #include "ui/robot_face.h"
+#include "fonts/mimi_fonts.h"
 #include "cJSON.h"
 #include <string.h>
 #include <stdlib.h>
@@ -103,18 +104,11 @@ static lv_color_t parse_color(const char *name) {
     return lv_color_white();
 }
 
-/* ── Font selector ── */
+/* ── Font selector (Chinese + ASCII via Alibaba PuHui Basic) ── */
 static const lv_font_t *pick_font(int size) {
-#if LV_FONT_MONTSERRAT_36
-    if (size >= 32) return &lv_font_montserrat_36;
-#endif
-#if LV_FONT_MONTSERRAT_28
-    if (size >= 25) return &lv_font_montserrat_28;
-#endif
-#if LV_FONT_MONTSERRAT_20
-    if (size >= 17) return &lv_font_montserrat_20;
-#endif
-    return &lv_font_montserrat_14;
+    if (size >= 25) return &font_puhui_basic_30_4;
+    if (size >= 17) return &font_puhui_basic_20_4;
+    return &font_puhui_basic_14_1;
 }
 
 /* ── Alignment parser (natural language friendly) ── */
@@ -225,6 +219,48 @@ static const char *find_symbol(const char *name) {
     }
     return NULL;
 }
+
+/* Font Awesome emoji symbol lookup (uses font_awesome_20_4) */
+static const struct { const char *name; const char *utf8; } fa_emoji_map[] = {
+    {"happy",       "\xef\x84\x98"},
+    {"laughing",    "\xef\x96\x9b"},
+    {"funny",       "\xef\x96\x88"},
+    {"sad",         "\xee\x8e\x84"},
+    {"angry",       "\xef\x95\x96"},
+    {"crying",      "\xef\x96\xb3"},
+    {"loving",      "\xef\x96\x84"},
+    {"embarrassed", "\xef\x95\xb9"},
+    {"surprised",   "\xee\x8d\xab"},
+    {"shocked",     "\xee\x8d\xb5"},
+    {"thinking",    "\xee\x8e\x9b"},
+    {"winking",     "\xef\x93\x9a"},
+    {"cool",        "\xee\x8e\x98"},
+    {"relaxed",     "\xee\x8e\x92"},
+    {"delicious",   "\xee\x8d\xb2"},
+    {"kissy",       "\xef\x96\x98"},
+    {"confident",   "\xee\x90\x89"},
+    {"sleepy",      "\xee\x8e\x8d"},
+    {"silly",       "\xee\x8e\xa4"},
+    {"confused",    "\xee\x8d\xad"},
+    {"neutral",     "\xef\x96\xa4"},
+    {"heart",       "\xef\x80\x84"},
+    {"star",        "\xef\x80\x85"},
+    {"music",       "\xef\x80\x81"},
+    {"camera",      "\xef\x80\xb0"},
+    {"sun",         "\xef\x86\x85"},
+    {"moon",        "\xef\x86\x86"},
+    {"cloud",       "\xef\x83\x82"},
+    {"snowflake",   "\xef\x8b\x9c"},
+    {"gamepad",     "\xef\x84\x9b"},
+    {"phone",       "\xef\x82\x95"},
+    {"globe",       "\xef\x82\xac"},
+    {"compass",     "\xef\x85\x8e"},
+    {"clock",       "\xef\x80\x97"},
+    {"microphone",  "\xef\x84\xb0"},
+    {"headphones",  "\xef\x80\xa5"},
+    {"check",       "\xef\x80\x8c"},
+    {"xmark",       "\xef\x80\x8d"},
+};
 
 /* Free heap-allocated line points on object delete */
 static void line_delete_cb(lv_event_t *e) {
@@ -397,22 +433,45 @@ static void exec_action(cJSON *root, lv_obj_t *scr, char *output, size_t output_
         snprintf(output, output_size, "[%s] arc %d-%ddeg r=%d center(%d,%d), %d objs",
                  s_objs[s_obj_count-1].id, sa, ea, r, cx, cy, s_obj_count);
 
-    /* ── symbol (built-in icons) ── */
+    /* ── symbol (built-in icons + Font Awesome emoji) ── */
     } else if (strcmp(action, "symbol") == 0) {
         const char *name = jstr(root, "name", "");
         const char *sym = find_symbol(name);
+        const char *fa_sym = NULL;
+        bool use_fa = false;
+
+        /* Check Font Awesome emoji table if not found in LVGL symbols */
         if (!sym) {
+            for (size_t i = 0; i < sizeof(fa_emoji_map)/sizeof(fa_emoji_map[0]); i++) {
+                if (strcmp(name, fa_emoji_map[i].name) == 0) {
+                    fa_sym = fa_emoji_map[i].utf8;
+                    use_fa = true;
+                    break;
+                }
+            }
+        }
+
+        if (!sym && !fa_sym) {
             snprintf(output, output_size,
-                "Unknown symbol '%s'. Available: ok, close, warning, home, settings, "
+                "Unknown symbol '%s'. Built-in: ok, close, warning, home, settings, "
                 "wifi, bluetooth, battery_full, charge, play, pause, stop, bell, mail, "
-                "power, refresh, edit, trash, plus, minus, up, down, left, right, "
-                "eye_open, eye_close, folder, file, image, audio, video, download, upload",
+                "power, refresh, edit, trash, plus, minus, up, down, left, right. "
+                "Emoji: happy, laughing, sad, angry, crying, loving, surprised, thinking, "
+                "winking, cool, heart, star, music, sun, moon, cloud, check, xmark",
                 name);
         } else {
             lv_obj_t *lbl = lv_label_create(scr);
             lv_obj_set_style_text_color(lbl, parse_color(jstr(root, "color", "white")), 0);
-            lv_obj_set_style_text_font(lbl, pick_font(jint(root, "font_size", 28)), 0);
-            lv_label_set_text(lbl, sym);
+            if (use_fa) {
+                /* Use Font Awesome for emoji symbols */
+                int fs = jint(root, "font_size", 28);
+                (void)fs;
+                lv_obj_set_style_text_font(lbl, &font_awesome_20_4, 0);
+                lv_label_set_text(lbl, fa_sym);
+            } else {
+                lv_obj_set_style_text_font(lbl, pick_font(jint(root, "font_size", 28)), 0);
+                lv_label_set_text(lbl, sym);
+            }
             pos_obj(lbl, root, false);
             char desc[80];
             snprintf(desc, sizeof(desc), "%s %s font=%d", name,

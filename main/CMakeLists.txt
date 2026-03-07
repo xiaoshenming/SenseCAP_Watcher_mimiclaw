@@ -22,6 +22,7 @@ idf_component_register(
         "tools/tool_camera.c"
         "tools/tool_display.c"
         "tools/tool_sysinfo.c"
+        "tools/tool_face.c"
         "skills/skill_loader.c"
         "hal/led/hal_led.c"
         "hal/audio/es8311.c"
@@ -43,6 +44,10 @@ idf_component_register(
         "hal/camera/hal_camera.c"
         "hal/hal_init.c"
         "ui/robot_face.c"
+        "fonts/font_puhui_basic_14_1.c"
+        "fonts/font_puhui_basic_20_4.c"
+        "fonts/font_puhui_basic_30_4.c"
+        "fonts/font_awesome_20_4.c"
     INCLUDE_DIRS
         "."
     REQUIRES
